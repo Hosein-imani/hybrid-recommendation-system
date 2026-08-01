@@ -1,0 +1,11 @@
+movieId,title,genres,year,similarity
+3114,Toy Story 2,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",1999,0.9999999999999999
+131248,Brother Bear 2,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2006,0.9999999999999999
+45074,"Wild, The","['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2006,0.9999999999999999
+91355,Asterix and the Vikings (Astérix et les Vikings),"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2006,0.9999999999999999
+53121,Shrek the Third,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2007,0.9999999999999999
+2294,Antz,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",1998,0.9999999999999999
+117454,The Magic Crystal,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2011,0.9999999999999999
+115879,Toy Story Toons: Small Fry,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2011,0.9999999999999999
+115875,Toy Story Toons: Hawaiian Vacation,"['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2011,0.9999999999999999
+114552,"Boxtrolls, The","['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']",2014,0.9999999999999999

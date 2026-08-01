@@ -1,0 +1,20 @@
+
+==================================================
+CONTENT-BASED RECOMMENDATION REPORT
+==================================================
+
+Movie ID
+--------
+1
+
+Movie Title
+-----------
+Toy Story
+
+Number of Recommendations
+-------------------------
+10
+
+Recommendation File
+-------------------
+C:\Users\ATOM\Desktop\hybrid-recommendation-system\outputs\content_based\recommender\recommendations\recommendations.csv

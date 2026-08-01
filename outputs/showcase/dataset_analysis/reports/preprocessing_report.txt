@@ -1,0 +1,36 @@
+
+==================================================
+PREPROCESSING REPORT
+==================================================
+
+Extract Year
+----------------------------------------
+
+Before:
+Toy Story (1995)
+
+After:
+Title : Toy Story
+Year  : 1995
+
+==================================================
+
+Split Genres
+----------------------------------------
+
+Before:
+Adventure|Animation|Children|Comedy|Fantasy
+
+After:
+['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy']
+
+==================================================
+
+Dataset Shape
+
+Rows    : 34208
+Columns : 4
+
+Columns
+
+['movieId', 'title', 'genres', 'year']

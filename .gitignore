@@ -60,8 +60,18 @@ data/processed/
 # Generated Outputs
 # ==================================
 
-outputs/
+# ==================================
+# Ignore generated outputs
+# ==================================
 
+outputs/*
+
+# Keep output folder structure
+!outputs/**/
+
+# Keep showcase and all its files
+!outputs/showcase/
+!outputs/showcase/**
 
 # ==================================
 # Operating System Files

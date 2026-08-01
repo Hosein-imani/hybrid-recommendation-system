@@ -1,0 +1,21 @@
+
+==================================================
+CONTENT-BASED SIMILARITY REPORT
+==================================================
+
+Query Movie
+-----------
+Movie ID : 1
+Title    : Toy Story
+
+Similarity Metric
+-----------------
+Cosine Similarity
+
+Top Recommendations
+-------------------
+10
+
+Output File
+-----------
+C:\Users\ATOM\Desktop\hybrid-recommendation-system\outputs\content_based\similarity\artifacts\top_similar_movies.csv

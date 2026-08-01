@@ -1,0 +1,40 @@
+DATA VALIDATION REPORT
+============================================================
+
+==================================================
+Movies Dataset
+==================================================
+Rows: 34208
+Columns: 3
+
+Data Types:
+movieId    int64
+title        str
+genres       str
+
+Missing Values:
+movieId    0
+title      0
+genres     0
+
+Duplicate Rows: 0
+
+==================================================
+Ratings Dataset
+==================================================
+Rows: 3899999
+Columns: 4
+
+Data Types:
+userId         int64
+movieId        int64
+rating       float64
+timestamp      int64
+
+Missing Values:
+userId       0
+movieId      0
+rating       0
+timestamp    0
+
+Duplicate Rows: 0

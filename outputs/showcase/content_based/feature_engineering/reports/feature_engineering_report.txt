@@ -1,0 +1,22 @@
+
+==================================================
+CONTENT-BASED FEATURE ENGINEERING REPORT
+==================================================
+
+Input Dataset
+-------------
+Rows    : 34208
+Columns : 4
+
+Output Dataset
+--------------
+Rows    : 34208
+Columns : 24
+
+Generated Genre Columns
+-----------------------
+['Adventure', 'Animation', 'Children', 'Comedy', 'Fantasy', 'Romance', 'Drama', 'Action', 'Crime', 'Thriller', 'Horror', 'Mystery', 'Sci-Fi', 'IMAX', 'Documentary', 'War', 'Musical', 'Western', 'Film-Noir', '(no genres listed)']
+
+Genre Matrix File
+-----------------
+C:\Users\ATOM\Desktop\hybrid-recommendation-system\outputs\content_based\feature_engineering\artifacts\genre_matrix.csv
