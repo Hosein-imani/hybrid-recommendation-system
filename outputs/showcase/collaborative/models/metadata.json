@@ -1,0 +1,10 @@
+{
+    "algorithm": "Surprise SVD",
+    "n_factors": 50,
+    "learning_rate": 0.005,
+    "regularization": 0.02,
+    "epochs": 20,
+    "ratings": 3899999,
+    "movies": 34208,
+    "users": 42130
+}
