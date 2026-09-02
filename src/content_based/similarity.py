@@ -10,22 +10,76 @@ class SimilarityCalculator:
 
     @staticmethod
     def find_similar_movies(
-        movie_id: int,
+        movie_id: int | list[int],
         genre_matrix: pd.DataFrame,
         top_n: int = 10,
     ) -> pd.DataFrame:
 
-        # پیدا کردن اندیس فیلم
-        movie_index = genre_matrix.index[
-            genre_matrix["movieId"] == movie_id
+        # -----------------------------------------
+        # Normalize input
+        # -----------------------------------------
+
+        if isinstance(movie_id, int):
+            movie_ids = [movie_id]
+
+        elif isinstance(movie_id, list):
+            movie_ids = movie_id
+
+        else:
+            raise TypeError(
+                "movie_id must be an int "
+                "or list[int]."
+            )
+
+        if not movie_ids:
+            raise ValueError(
+                "At least one movie ID is required."
+            )
+
+        # Remove duplicate IDs while
+        # preserving input order.
+        movie_ids = list(
+            dict.fromkeys(movie_ids)
+        )
+
+        # -----------------------------------------
+        # Find input movies
+        # -----------------------------------------
+
+        movie_indexes = genre_matrix.index[
+            genre_matrix["movieId"].isin(
+                movie_ids
+            )
         ]
 
-        if len(movie_index) == 0:
-            raise ValueError(f"Movie ID {movie_id} not found.")
+        if len(movie_indexes) == 0:
+            raise ValueError(
+                "None of the provided Movie IDs "
+                "were found."
+            )
 
-        movie_index = movie_index[0]
+        found_movie_ids = set(
+            genre_matrix.loc[
+                movie_indexes,
+                "movieId",
+            ]
+        )
 
-        # فقط ستون‌های ویژگی
+        missing_movie_ids = (
+            set(movie_ids)
+            - found_movie_ids
+        )
+
+        if missing_movie_ids:
+            raise ValueError(
+                "Movie IDs not found: "
+                f"{sorted(missing_movie_ids)}"
+            )
+
+        # -----------------------------------------
+        # Feature matrix
+        # -----------------------------------------
+
         features = genre_matrix.drop(
             columns=[
                 "movieId",
@@ -35,14 +89,33 @@ class SimilarityCalculator:
             ]
         )
 
-        # بردار فیلم انتخاب‌شده
-        movie_vector = features.iloc[[movie_index]]
+        # -----------------------------------------
+        # Build preference profile
+        # -----------------------------------------
 
-        # شباهت با تمام فیلم‌ها
+        movie_vectors = features.loc[
+            movie_indexes
+        ]
+
+        profile_vector = (
+            movie_vectors
+            .mean(axis=0)
+            .to_frame()
+            .T
+        )
+
+        # -----------------------------------------
+        # Calculate similarity
+        # -----------------------------------------
+
         scores = cosine_similarity(
-            movie_vector,
+            profile_vector,
             features,
         ).flatten()
+
+        # -----------------------------------------
+        # Build result
+        # -----------------------------------------
 
         similarity_df = genre_matrix[
             [
@@ -53,16 +126,30 @@ class SimilarityCalculator:
             ]
         ].copy()
 
-        similarity_df["similarity"] = scores
+        similarity_df[
+            "similarity"
+        ] = scores
 
-        similarity_df = similarity_df.sort_values(
-            by="similarity",
-            ascending=False,
-        )
+        # -----------------------------------------
+        # Remove input movies
+        # -----------------------------------------
 
-        # حذف خود فیلم
         similarity_df = similarity_df[
-            similarity_df["movieId"] != movie_id
+            ~similarity_df["movieId"].isin(
+                movie_ids
+            )
         ]
+
+        # -----------------------------------------
+        # Sort by similarity
+        # -----------------------------------------
+
+        similarity_df = (
+            similarity_df
+            .sort_values(
+                by="similarity",
+                ascending=False,
+            )
+        )
 
         return similarity_df.head(top_n)

@@ -419,10 +419,11 @@ class HybridRecommender:
     def _validate_request(
         self,
         user_id: int,
-        seed_movie_id: int,
+        seed_movie_id: int | list[int],
         genre_matrix: pd.DataFrame,
         top_n_per_model: int,
     ) -> None:
+
         if (
             not isinstance(top_n_per_model, int)
             or isinstance(top_n_per_model, bool)
@@ -448,18 +449,87 @@ class HybridRecommender:
                 "in ratings history."
             )
 
-        if seed_movie_id not in set(self.movies["movieId"]):
+        # -----------------------------------------
+        # Normalize seed movie IDs
+        # -----------------------------------------
+
+        if isinstance(seed_movie_id, int):
+
+            seed_movie_ids = [seed_movie_id]
+
+        elif isinstance(seed_movie_id, list):
+
+            seed_movie_ids = seed_movie_id
+
+        else:
+
             raise ValueError(
-                f"Seed movie ID {seed_movie_id} "
-                "was not found in movies."
+                "seed_movie_id must be an int "
+                "or list[int]."
             )
 
-        if seed_movie_id not in set(
-            genre_matrix["movieId"]
+        if not seed_movie_ids:
+
+            raise ValueError(
+                "At least one seed movie ID is required."
+            )
+
+        if not all(
+            isinstance(movie_id, int)
+            and not isinstance(movie_id, bool)
+            for movie_id in seed_movie_ids
         ):
             raise ValueError(
-                f"Seed movie ID {seed_movie_id} "
-                "was not found in genre_matrix."
+                "All seed movie IDs must be integers."
+            )
+
+        if len(seed_movie_ids) != len(
+            set(seed_movie_ids)
+        ):
+            raise ValueError(
+                "Duplicate seed movie IDs are not allowed."
+            )
+
+        # -----------------------------------------
+        # Validate against movies dataset
+        # -----------------------------------------
+
+        movie_ids = set(
+            self.movies["movieId"]
+        )
+
+        missing_movie_ids = (
+            set(seed_movie_ids)
+            - movie_ids
+        )
+
+        if missing_movie_ids:
+
+            raise ValueError(
+                "Seed movie IDs were not found "
+                f"in movies: "
+                f"{sorted(missing_movie_ids)}"
+            )
+
+        # -----------------------------------------
+        # Validate against genre matrix
+        # -----------------------------------------
+
+        genre_movie_ids = set(
+            genre_matrix["movieId"]
+        )
+
+        missing_genre_ids = (
+            set(seed_movie_ids)
+            - genre_movie_ids
+        )
+
+        if missing_genre_ids:
+
+            raise ValueError(
+                "Seed movie IDs were not found "
+                f"in genre_matrix: "
+                f"{sorted(missing_genre_ids)}"
             )
 
     def _get_seen_movie_ids(
