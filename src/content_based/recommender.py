@@ -10,11 +10,13 @@ class ContentBasedRecommender:
 
     def __init__(self):
 
-        self.similarity_calculator = SimilarityCalculator()
+        self.similarity_calculator = (
+            SimilarityCalculator()
+        )
 
     def recommend(
         self,
-        movie_id: int,
+        movie_id: int | list[int],
         genre_matrix: pd.DataFrame,
         top_n: int = 10,
     ) -> pd.DataFrame:

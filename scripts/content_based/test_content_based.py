@@ -18,7 +18,10 @@ from src.content_based.recommender import ContentBasedRecommender
 # chose movie name from the dataset 
 # and drop in the MOVIE_TITLE variable below
 # ================================
-MOVIE_TITLE = "Jumanji"
+MOVIE_TITLE = [
+    "Jumanji",
+    "Toy Story",
+]
 TOP_N = 10
 # ================================
 
@@ -75,27 +78,36 @@ def main():
     # Find Movie
     # -------------------------------
 
-    selected_movie = genre_matrix[
-        genre_matrix["title"] == MOVIE_TITLE
-    ]
+    movie_ids = []
 
+    for movie_title in MOVIE_TITLE:
 
-    if selected_movie.empty:
+        selected_movie = genre_matrix[
+            genre_matrix["title"] == movie_title
+        ]
 
-        raise ValueError(
-            f"Movie not found: {MOVIE_TITLE}"
+        if selected_movie.empty:
+            raise ValueError(
+                f"Movie not found: {movie_title}"
+            )
+
+        movie_id = (
+            selected_movie["movieId"]
+            .iloc[0]
         )
 
+        movie_ids.append(movie_id)
 
-    movie_id = (
-        selected_movie["movieId"]
-        .iloc[0]
-    )
+    print("\nSelected Movies:")
 
-
-    print(
-        f"\nSelected Movie: {MOVIE_TITLE}"
-    )
+    for movie_title, movie_id in zip(
+        MOVIE_TITLE,
+        movie_ids,
+    ):
+        print(
+            f"- {movie_title} "
+            f"(ID: {movie_id})"
+        )
 
 
     # -------------------------------
@@ -106,11 +118,10 @@ def main():
 
 
     recommendations = recommender.recommend(
-        movie_id=movie_id,
+        movie_id=movie_ids,
         genre_matrix=genre_matrix,
         top_n=TOP_N,
     )
-
 
     # -------------------------------
     # Save Output
