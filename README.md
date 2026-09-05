@@ -1,4 +1,5 @@
-[🇺🇸 English](https://github.com/Hosein-imani/hybrid-recommendation-system#english) | [🇮🇷 فارسی](https://github.com/Hosein-imani/hybrid-recommendation-system#%D8%B1%D8%A7%D9%87%D9%86%D9%85%D8%A7%DB%8C-%D9%81%D8%A7%D8%B1%D8%B3%DB%8C)
+[🇺🇸 English](#-english-readme) | [🇮🇷 فارسی](#-راهنمای-فارسی)
+)
 
 # English
 
@@ -63,6 +64,7 @@ The repository keeps lightweight reports, sample recommendations, and visualizat
 The versioned Collaborative showcase reports **RMSE 0.8200** and **MAE 0.6246** on a test split of 780,000 ratings. Generated Hybrid outputs are written locally under `outputs/hybrid/` and can be promoted to the showcase when ready.
 
 ## Documentation
+## 📗 راهنمای فارسی
 
 - [Data pipeline](docs/dataset.md)
 - [Content-Based Filtering](docs/content_based.md)
