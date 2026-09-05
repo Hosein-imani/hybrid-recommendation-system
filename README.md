@@ -1,307 +1,33 @@
-# hybrid-recommendation-system
-
-[🇺🇸 English](#-english-readme) | [🇮🇷 فارسی](#-%D8%B1%D8%A7%D9%87%D9%86%D9%85%D8%A7%DB%8C-%D9%81%D8%A7%D8%B1%D8%B3%DB%8C)
-
-<a id="-english-readme"></a>
-
-## 🇺🇸 English README
-
-### 🎬 Overview
-
-<code>hybrid-recommendation-system</code> is a modular movie recommendation project built with Python. It combines three layers:
-
-- a reusable data loading, validation, and preprocessing pipeline;
-- a content-based recommender built from movie genres;
-- a collaborative recommender based on SVD matrix factorization.
-
-The hybrid layer coordinates the two recommenders and separates movies recommended by both models from movies suggested by only one of them. The project is intentionally organized as independent modules so each part can be tested, improved, or replaced without rewriting the entire system.
-
-The current implementation also supports using one or multiple seed movies as the input for content-based and hybrid recommendations.
-
-### ✨ What this project demonstrates
-
-- Clean separation between data preparation, feature engineering, modeling, recommendation, and evaluation.
-- Content-based recommendations from one-hot encoded genre features and cosine similarity.
-- Collaborative recommendations from user-rating history and Surprise SVD.
-- Hybrid recommendation organization based on overlap between two independent Top-N lists.
-- Validation reports, model evaluation reports, recommendation tables, and visual outputs.
-- A practical project structure that can later be extended with an API, Docker, or a user interface.
-
-### 🧭 System architecture
-
-~~~mermaid
-flowchart LR
-    A[Raw movie and rating data] --> B[Load and validate]
-    B --> C[Preprocess datasets]
-    C --> D[Content-based pipeline]
-    C --> E[Collaborative pipeline]
-    D --> F[Hybrid coordinator]
-    E --> F
-    F --> G[Recommendations]
-    D --> H[Reports and visualizations]
-    E --> H
-    F --> H
-~~~
-
-### 🗂️ Dataset and data pipeline
-
-The project uses a MovieLens dataset with two raw CSV files:
-
-| File | Main columns | Purpose |
-| --- | --- | --- |
-| <code>movies.csv</code> | <code>movieId</code>, <code>title</code>, <code>genres</code> | Movie metadata and content features |
-| <code>ratings.csv</code> | <code>userId</code>, <code>movieId</code>, <code>rating</code>, <code>timestamp</code> | Historical user–movie interactions |
-
-The raw files are expected under <code>data/raw/</code>. Because the dataset is relatively large, the repository tracks these files with Git LFS.
-
-The shared data pipeline is responsible for:
-
-1. Loading the raw CSV files through one consistent interface.
-2. Checking dimensions, data types, missing values, and duplicate rows.
-3. Extracting the release year from movie titles.
-4. Cleaning movie titles and splitting the pipe-separated genre field.
-5. Removing <code>timestamp</code> from the rating frame for the current models, since the implemented recommenders do not use temporal information yet.
-
-This shared foundation allows all recommendation approaches to work with the same prepared data.
-
-### 🎯 Content-based recommendation
-
-The content-based module recommends movies that are similar to one or more input movies.
-
-Its workflow is:
-
-1. Convert each movie's genre list into a numerical genre matrix using one-hot encoding.
-2. Represent every movie as a genre vector.
-3. Build a preference profile from the selected movie or the average vector of multiple selected movies.
-4. Calculate cosine similarity between the profile and all movie vectors.
-5. Remove the input movies, rank the candidates, and return the Top-N results.
-
-This approach is easy to explain: a movie is recommended because its genre profile is close to the user's selected movies. The main implementation is split into feature engineering, similarity calculation, and recommendation layers.
-
-### 👥 Collaborative recommendation
-
-The collaborative module learns from rating behavior instead of movie metadata.
-
-It uses the Surprise <code>SVD</code> algorithm, which applies matrix factorization to discover latent relationships between users and movies. The training pipeline:
-
-1. Converts the ratings DataFrame into a Surprise dataset.
-2. Splits the interactions into training and test sets.
-3. Trains the SVD model with configurable latent factors, learning rate, regularization, and epochs.
-4. Evaluates rating prediction with RMSE and MAE.
-5. Predicts ratings for candidate movies and returns the highest-rated unseen movies for a user.
-
-The trained model and its trainset can be persisted with Joblib so recommendations can be generated later without retraining.
-
-### 🔀 Hybrid recommendation
-
-The hybrid module is a coordination layer rather than a weighted score-fusion model. It runs the content-based and collaborative recommenders independently and then organizes their results.
-
-~~~mermaid
-flowchart TD
-    A[Content-based Top-N] --> C{Is the movie in both lists?}
-    B[Collaborative Top-N] --> C
-    C -->|Yes| D[Special: shared recommendation]
-    C -->|Only content-based| E[Content-based section]
-    C -->|Only collaborative| F[Collaborative section]
-~~~
-
-The hybrid workflow:
-
-- removes movies already seen by the selected user;
-- places movies returned by both recommenders in the <code>special</code> section;
-- keeps content-only and collaborative-only movies in their own sections;
-- preserves each model's source score and rank;
-- uses the sum of source ranks only to order the shared <code>special</code> section, not to combine incomparable scores;
-- validates input data, output columns, duplicate movie IDs, metadata integrity, overlap, diversity, and score summaries.
-
-The current hybrid pipeline accepts multiple seed movie titles, converts them to movie IDs, and passes them to the content-based profile builder.
-
-### 🧱 Project structure
-
-~~~text
-hybrid-recommendation-system/
-├── data/
-│   ├── raw/                      # Raw movies and ratings CSV files
-│   └── processed/                # Reserved for future processed data
-├── docs/                         # Module-level documentation
-├── outputs/
-│   ├── dataset_analysis/         # Data quality and preprocessing reports
-│   ├── content_based/            # Content-based runtime outputs
-│   ├── collaborative/            # Collaborative runtime outputs and models
-│   ├── hybrid/                   # Hybrid runtime outputs
-│   └── showcase/                 # Curated reports, artifacts, and visuals
-├── scripts/
-│   ├── dataset/                  # Dataset analysis, validation, preprocessing
-│   ├── content_based/            # Feature, similarity, and recommendation runs
-│   ├── collaborative/            # SVD training and recommendation runs
-│   └── hybrid/                   # Hybrid generation and evaluation scripts
-├── src/
-│   ├── config/                   # Centralized project paths
-│   ├── data/                     # Loading, validation, preprocessing
-│   ├── content_based/            # Genre features and cosine similarity
-│   ├── collaborative/            # SVD model, evaluation, recommendation
-│   └── hybrid/                   # Hybrid coordination and evaluation
-├── requirements.txt
-├── pyproject.toml
-└── LICENSE
-~~~
-
-### 🚀 Installation
-
-Run the commands from the repository root:
-
-~~~bash
-python -m venv .venv
-~~~
-
-Windows PowerShell:
-
-~~~powershell
-.venv\Scripts\Activate.ps1
-~~~
-
-macOS/Linux:
-
-~~~bash
-source .venv/bin/activate
-~~~
-
-Install the project dependencies:
-
-~~~bash
-python -m pip install -r requirements.txt
-~~~
-
-If the raw dataset is not fully available after cloning, make sure Git LFS is installed and pull the tracked data:
-
-~~~bash
-git lfs install
-git lfs pull
-~~~
-
-### ▶️ Running the pipelines
-
-All commands below should be executed from the repository root.
-
-#### 1. Inspect and prepare the dataset
-
-~~~bash
-python scripts/dataset/analyze_dataset.py
-python scripts/dataset/validate_dataset.py
-python scripts/dataset/preprocess_dataset.py
-~~~
-
-#### 2. Run the content-based pipeline
-
-~~~bash
-python scripts/content_based/run_feature_engineering.py
-python scripts/content_based/run_similarity.py
-python scripts/content_based/run_recommender.py
-~~~
-
-For a small interactive-style check with selected movie titles:
-
-~~~bash
-python scripts/content_based/test_content_based.py
-~~~
-
-#### 3. Train and use the collaborative model
-
-Train, evaluate, save the model, and generate a sample recommendation list:
-
-~~~bash
-python scripts/collaborative/run_svd.py
-~~~
-
-After the model artifacts have been created, the test script can load the model and ask for a user ID:
-
-~~~bash
-python scripts/collaborative/test_collaborative.py
-~~~
-
-#### 4. Run the hybrid pipeline
-
-~~~bash
-python scripts/hybrid/run_hybrid.py
-~~~
-
-The pipeline trains the collaborative component, builds the content-based genre representation, generates both recommendation lists, and writes separate hybrid sections for shared, content-only, and collaborative-only movies.
-
-The current evaluation module can then be run with:
-
-~~~bash
-python src/hybrid/evaluate_hybrid.py
-~~~
-
-The user ID, seed movie titles, and requested Top-N size are configured in the corresponding scripts, so they can be adjusted without changing the core recommendation classes.
-
-### 📦 Outputs and showcase
-
-Runtime artifacts are organized under <code>outputs/</code> by pipeline. Depending on the module, the generated results include recommendation tables, evaluation reports, feature artifacts, serialized model data, and visualizations.
-
-The <code>outputs/showcase/</code> directory contains curated examples from the dataset analysis, content-based, and collaborative parts of the project. Each area is kept separately so readers can inspect the result of that stage without mixing it with another model's output. Model-related artifacts and generated examples are also grouped by module there.
-
-Hybrid runtime outputs are not included in the showcase yet. They are generated under <code>outputs/hybrid/</code> when the hybrid pipeline is executed and can be added to the showcase later when the hybrid presentation is finalized.
-
-### 📚 Additional documentation
-
-- [Dataset pipeline](docs/dataset.md)
-- [Content-based recommendation](docs/content_based.md)
-- [Collaborative filtering](docs/collaborative.md)
-
-### 🛠️ Technology stack
-
-- Python
-- Pandas and NumPy for data processing
-- Scikit-learn for cosine similarity
-- Scikit-surprise for SVD matrix factorization
-- Joblib for saving and loading model artifacts
-- Matplotlib and Seaborn support for visual outputs
-
-### 🔮 Future direction
-
-The project is structured so the next stages can be added without changing its core idea. Planned directions include:
-
-- Docker-based setup and reproducible execution;
-- API exposure for recommendation requests;
-- a lightweight application or user interface;
-- richer movie features and more advanced ranking strategies;
-- improved experiment tracking and deployment-oriented evaluation.
-
-### 📄 License
-
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
-
-[⬆️ Back to language selection](#hybrid-recommendation-system)
-
 <a id="-راهنمای-فارسی"></a>
 
 ## 🇮🇷 راهنمای فارسی
 
 ### 🎬 معرفی پروژه
 
-<code>hybrid-recommendation-system</code> یک پروژه‌ی ماژولار برای پیشنهاد فیلم است که با Python ساخته شده است. این پروژه سه بخش اصلی را کنار هم قرار می‌دهد:
+این پروژه، یک سیستم ماژولار برای پیشنهاد فیلم است که با `Python` ساخته شده است. پروژه از سه بخش اصلی تشکیل شده است:
 
-- یک pipeline مشترک برای بارگذاری، اعتبارسنجی و آماده‌سازی داده؛
-- یک سیستم پیشنهاددهنده‌ی content-based بر اساس ژانر فیلم‌ها؛
-- یک سیستم پیشنهاددهنده‌ی collaborative بر پایه‌ی فاکتورگیری ماتریس با الگوریتم SVD.
+* یک `pipeline` مشترک برای بارگذاری، اعتبارسنجی و آماده‌سازی داده‌ها؛
+* یک سیستم پیشنهاددهنده‌ی مبتنی بر محتوا (`Content-Based`) بر اساس ژانر فیلم‌ها؛
+* یک سیستم پیشنهاددهنده‌ی مشارکتی (`Collaborative Filtering`) بر پایه‌ی فاکتورگیری ماتریس با الگوریتم `SVD`.
 
-بخش hybrid این دو پیشنهاددهنده را جداگانه اجرا می‌کند و نتیجه را به سه گروه تقسیم می‌کند: فیلم‌هایی که هر دو مدل پیشنهاد داده‌اند، فیلم‌هایی که فقط مدل content-based پیشنهاد داده است و فیلم‌هایی که فقط مدل collaborative پیشنهاد داده است. ساختار پروژه عمداً ماژولار طراحی شده تا هر بخش را بتوان مستقل آزمایش، اصلاح یا جایگزین کرد.
+بخش `Hybrid` این دو سیستم پیشنهاددهنده را به‌صورت مستقل اجرا می‌کند و نتایج آن‌ها را در سه گروه قرار می‌دهد: فیلم‌هایی که هر دو مدل پیشنهاد داده‌اند، فیلم‌هایی که فقط مدل `Content-Based` پیشنهاد داده است و فیلم‌هایی که فقط مدل `Collaborative` پیشنهاد داده است.
 
-در پیاده‌سازی فعلی، برای پیشنهاددهی content-based و hybrid می‌توان یک فیلم یا چند فیلم را به‌عنوان ورودی اولیه انتخاب کرد.
+ساختار پروژه به‌صورت ماژولار طراحی شده است تا هر بخش را بتوان به‌صورت مستقل آزمایش، اصلاح یا جایگزین کرد؛ بدون اینکه لازم باشد کل سیستم از ابتدا بازنویسی شود.
+
+در پیاده‌سازی فعلی، برای پیشنهاددهی مبتنی بر محتوا و پیشنهاددهی `Hybrid` می‌توان یک فیلم یا چند فیلم را به‌عنوان فیلم‌های اولیه انتخاب کرد.
 
 ### ✨ این پروژه چه چیزهایی را نشان می‌دهد؟
 
-- جداسازی تمیز آماده‌سازی داده، مهندسی ویژگی، مدل‌سازی، پیشنهاددهی و ارزیابی؛
-- پیشنهاد فیلم بر اساس ویژگی‌های ژانری و cosine similarity؛
-- پیشنهاد فیلم بر اساس سابقه‌ی امتیازدهی کاربران و SVD؛
-- سازمان‌دهی نتایج hybrid بر اساس اشتراک خروجی دو مدل مستقل؛
-- تولید گزارش‌های اعتبارسنجی، ارزیابی مدل، جدول‌های پیشنهاد و خروجی‌های تصویری؛
-- ساختاری قابل توسعه برای اضافه شدن API، Docker یا رابط کاربری در مراحل بعدی.
+* جداسازی مناسب مراحل آماده‌سازی داده، مهندسی ویژگی، مدل‌سازی، پیشنهاددهی و ارزیابی؛
+* پیشنهاد فیلم بر اساس ویژگی‌های ژانری و شباهت کسینوسی (`Cosine Similarity`)؛
+* پیشنهاد فیلم بر اساس سابقه‌ی امتیازدهی کاربران و الگوریتم `SVD`؛
+* سازمان‌دهی نتایج `Hybrid` بر اساس میزان اشتراک خروجی دو مدل مستقل؛
+* تولید گزارش‌های اعتبارسنجی، گزارش‌های ارزیابی مدل، جدول‌های پیشنهاد و خروجی‌های تصویری؛
+* ساختاری قابل توسعه برای اضافه کردن `API`، `Docker` یا رابط کاربری در مراحل بعدی.
 
 ### 🧭 معماری کلی سیستم
 
-~~~mermaid
+```mermaid
 flowchart LR
     A[داده‌ی خام فیلم و امتیازها] --> B[بارگذاری و اعتبارسنجی]
     B --> C[پیش‌پردازش داده]
@@ -313,235 +39,261 @@ flowchart LR
     D --> H[گزارش‌ها و نمودارها]
     E --> H
     F --> H
-~~~
+```
 
-### 🗂️ داده و pipeline آماده‌سازی
+### 🗂️ داده‌ها و `Pipeline` آماده‌سازی
 
-پروژه از دیتاست MovieLens استفاده می‌کند و دو فایل CSV اصلی دارد:
+پروژه از دیتاست `MovieLens` استفاده می‌کند و شامل دو فایل اصلی `CSV` است:
 
-| فایل | ستون‌های اصلی | کاربرد |
-| --- | --- | --- |
-| <code>movies.csv</code> | <code>movieId</code>، <code>title</code>، <code>genres</code> | اطلاعات فیلم و ویژگی‌های محتوایی |
+| فایل                     | ستون‌های اصلی                                                                          | کاربرد                           |
+| ------------------------ | -------------------------------------------------------------------------------------- | -------------------------------- |
+| <code>movies.csv</code>  | <code>movieId</code>، <code>title</code>، <code>genres</code>                          | اطلاعات فیلم و ویژگی‌های محتوایی |
 | <code>ratings.csv</code> | <code>userId</code>، <code>movieId</code>، <code>rating</code>، <code>timestamp</code> | سابقه‌ی تعامل کاربران با فیلم‌ها |
 
-فایل‌های خام باید داخل <code>data/raw/</code> قرار داشته باشند. چون حجم داده نسبتاً زیاد است، این فایل‌ها در مخزن با Git LFS مدیریت می‌شوند.
+فایل‌های خام باید داخل مسیر <code>data/raw/</code> قرار داشته باشند. از آنجا که حجم داده نسبتاً زیاد است، این فایل‌ها در مخزن با استفاده از `Git LFS` مدیریت می‌شوند.
 
-pipeline مشترک داده این کارها را انجام می‌دهد:
+`Pipeline` مشترک داده، مراحل زیر را انجام می‌دهد:
 
-1. فایل‌های CSV خام را از یک مسیر و رابط یکسان می‌خواند.
-2. تعداد سطر و ستون، نوع داده‌ها، مقادیر خالی و رکوردهای تکراری را بررسی می‌کند.
-3. سال انتشار را از عنوان فیلم جدا می‌کند.
-4. عنوان فیلم را تمیز می‌کند و مقدار چندبخشی ژانرها را به فهرست تبدیل می‌کند.
-5. ستون <code>timestamp</code> را برای مدل‌های فعلی از داده‌ی امتیازها حذف می‌کند، چون پیشنهاددهنده‌های فعلی هنوز از اطلاعات زمانی استفاده نمی‌کنند.
+1. فایل‌های خام `CSV` را از یک مسیر و با یک رابط یکسان بارگذاری می‌کند.
+2. تعداد سطرها و ستون‌ها، نوع داده‌ها، مقادیر خالی و رکوردهای تکراری را بررسی می‌کند.
+3. سال انتشار فیلم را از عنوان آن استخراج می‌کند.
+4. عنوان فیلم‌ها را پاک‌سازی می‌کند و مقدار چندبخشی ژانرها را به فهرست تبدیل می‌کند.
+5. ستون <code>timestamp</code> را از داده‌های امتیازدهی حذف می‌کند؛ زیرا مدل‌های فعلی هنوز از اطلاعات زمانی استفاده نمی‌کنند.
 
-به این شکل، هر سه رویکرد پیشنهاددهی از یک پایه‌ی داده‌ی مشترک و قابل اعتماد استفاده می‌کنند.
+به این ترتیب، تمام روش‌های پیشنهاددهی از یک پایه‌ی داده‌ی مشترک و آماده‌شده استفاده می‌کنند.
 
 ### 🎯 پیشنهاددهی مبتنی بر محتوا
 
-ماژول content-based فیلم‌هایی را پیشنهاد می‌دهد که از نظر ویژگی‌های محتوایی به یک یا چند فیلم انتخاب‌شده شباهت دارند.
+ماژول `Content-Based` فیلم‌هایی را پیشنهاد می‌دهد که از نظر ویژگی‌های محتوایی به یک یا چند فیلم انتخاب‌شده شباهت دارند.
 
-روند کار آن به‌صورت خلاصه این است:
+روند کار این ماژول به‌صورت خلاصه به شکل زیر است:
 
-1. فهرست ژانرهای هر فیلم را با one-hot encoding به ماتریس عددی تبدیل می‌کند.
-2. هر فیلم را به شکل یک بردار ژانری نمایش می‌دهد.
-3. برای فیلم انتخاب‌شده یا میانگین چند فیلم انتخاب‌شده یک profile می‌سازد.
-4. شباهت cosine را بین profile و همه‌ی فیلم‌ها محاسبه می‌کند.
-5. خود فیلم‌های ورودی را حذف می‌کند، نتایج را مرتب می‌کند و Top-N را برمی‌گرداند.
+1. فهرست ژانرهای هر فیلم را با استفاده از `One-Hot Encoding` به یک ماتریس عددی تبدیل می‌کند.
+2. هر فیلم را به‌صورت یک بردار ژانری نمایش می‌دهد.
+3. برای یک فیلم انتخاب‌شده یا میانگین چند فیلم انتخاب‌شده، یک `Profile` ایجاد می‌کند.
+4. شباهت کسینوسی (`Cosine Similarity`) بین `Profile` و بردار تمام فیلم‌ها را محاسبه می‌کند.
+5. فیلم‌های ورودی را از نتایج حذف می‌کند، نتایج را مرتب می‌کند و `Top-N` پیشنهاد را برمی‌گرداند.
 
-مزیت این روش این است که دلیل پیشنهاد قابل توضیح است: فیلمی پیشنهاد شده چون الگوی ژانری آن به فیلم‌های انتخاب‌شده نزدیک است. این بخش از سه لایه‌ی مهندسی ویژگی، محاسبه‌ی شباهت و recommendation تشکیل شده است.
+مزیت اصلی این روش، قابل‌توضیح بودن دلیل پیشنهادهاست. یک فیلم پیشنهاد می‌شود چون الگوی ژانری آن به فیلم‌های انتخاب‌شده نزدیک است.
+
+این بخش از سه لایه‌ی اصلی تشکیل شده است:
+
+* مهندسی ویژگی (`Feature Engineering`)؛
+* محاسبه‌ی شباهت (`Similarity Calculation`)؛
+* پیشنهاددهی (`Recommendation`).
 
 ### 👥 پیشنهاددهی مشارکتی
 
-ماژول collaborative به‌جای تکیه بر اطلاعات ژانری، از رفتار امتیازدهی کاربران یاد می‌گیرد.
+ماژول `Collaborative` به‌جای استفاده از اطلاعات ژانری فیلم‌ها، از رفتار امتیازدهی کاربران یاد می‌گیرد.
 
-در این بخش از الگوریتم <code>SVD</code> کتابخانه‌ی Surprise استفاده شده است. SVD با فاکتورگیری ماتریس، رابطه‌های پنهان بین کاربران و فیلم‌ها را یاد می‌گیرد. روند آموزش شامل این مراحل است:
+در این بخش از الگوریتم `SVD` در کتابخانه‌ی `Surprise` استفاده شده است. این الگوریتم با استفاده از فاکتورگیری ماتریس، روابط پنهان میان کاربران و فیلم‌ها را یاد می‌گیرد.
 
-1. تبدیل DataFrame امتیازها به دیتاست قابل استفاده برای Surprise؛
-2. جدا کردن داده‌ی آموزش و آزمون؛
-3. آموزش مدل SVD با پارامترهایی مثل تعداد فاکتورهای نهفته، نرخ یادگیری، regularization و تعداد epoch؛
-4. ارزیابی پیش‌بینی امتیازها با RMSE و MAE؛
-5. پیش‌بینی امتیاز فیلم‌های مناسب و برگرداندن فیلم‌های ندیده‌ی کاربر با بیشترین امتیاز تخمینی.
+روند آموزش مدل شامل مراحل زیر است:
 
-مدل آموزش‌دیده و trainset آن با Joblib ذخیره می‌شوند تا در اجرای بعدی نیازی به آموزش دوباره نباشد.
+1. تبدیل `DataFrame` امتیازها به دیتاست قابل استفاده برای `Surprise`؛
+2. تقسیم داده‌ها به مجموعه‌ی آموزش و آزمون؛
+3. آموزش مدل `SVD` با پارامترهایی مانند تعداد فاکتورهای نهفته، نرخ یادگیری، `Regularization` و تعداد `Epoch`؛
+4. ارزیابی عملکرد مدل در پیش‌بینی امتیازها با معیارهای `RMSE` و `MAE`؛
+5. پیش‌بینی امتیاز فیلم‌های مناسب و برگرداندن فیلم‌های دیده‌نشده‌ی کاربر با بالاترین امتیاز پیش‌بینی‌شده.
 
-### 🔀 پیشنهاددهی Hybrid
+مدل آموزش‌دیده و `Trainset` آن با استفاده از `Joblib` ذخیره می‌شوند تا در اجراهای بعدی، نیازی به آموزش مجدد مدل نباشد.
 
-بخش hybrid در این پروژه یک لایه‌ی هماهنگ‌کننده است، نه یک مدل weighted score fusion. ابتدا دو پیشنهاددهنده مستقل اجرا می‌شوند و بعد نتایج آن‌ها کنار هم سازمان‌دهی می‌شوند.
+### 🔀 پیشنهاددهی `Hybrid`
 
-~~~mermaid
+بخش `Hybrid` در این پروژه یک لایه‌ی هماهنگ‌کننده است و یک مدل `Weighted Score Fusion` محسوب نمی‌شود.
+
+ابتدا دو سیستم پیشنهاددهنده به‌صورت مستقل اجرا می‌شوند و سپس نتایج آن‌ها در کنار یکدیگر سازمان‌دهی می‌شوند.
+
+```mermaid
 flowchart TD
-    A[Top-N محتوایی] --> C{فیلم در هر دو فهرست هست؟}
+    A[Top-N محتوایی] --> C{فیلم در هر دو فهرست وجود دارد؟}
     B[Top-N مشارکتی] --> C
     C -->|بله| D[Special: پیشنهاد مشترک]
-    C -->|فقط محتوایی| E[بخش Content-based]
+    C -->|فقط محتوایی| E[بخش Content-Based]
     C -->|فقط مشارکتی| F[بخش Collaborative]
-~~~
+```
 
-روند hybrid این ویژگی‌ها را دارد:
+فرآیند `Hybrid` شامل ویژگی‌های زیر است:
 
-- فیلم‌هایی را که کاربر قبلاً دیده یا امتیاز داده است حذف می‌کند؛
-- فیلم‌های مشترک دو مدل را در بخش <code>special</code> قرار می‌دهد؛
-- فیلم‌های مخصوص هر مدل را در بخش جداگانه نگه می‌دارد؛
-- امتیاز و رتبه‌ی تولیدشده توسط هر مدل را حفظ می‌کند؛
-- مجموع رتبه‌ها را فقط برای مرتب‌سازی بخش مشترک استفاده می‌کند و امتیازهای دو مدل را مستقیماً با هم جمع نمی‌کند؛
-- صحت داده‌های ورودی، ستون‌های خروجی، شناسه‌های تکراری، کامل بودن metadata، میزان اشتراک، تنوع ژانرها و خلاصه‌ی امتیازها را بررسی می‌کند.
+* فیلم‌هایی را که کاربر قبلاً مشاهده یا امتیازدهی کرده است از نتایج حذف می‌کند؛
+* فیلم‌های مشترک میان دو مدل را در بخش <code>special</code> قرار می‌دهد؛
+* فیلم‌های پیشنهادشده فقط توسط مدل `Content-Based` و فقط توسط مدل `Collaborative` را در بخش‌های جداگانه نگه می‌دارد؛
+* امتیاز و رتبه‌ی تولیدشده توسط هر مدل را حفظ می‌کند؛
+* مجموع رتبه‌های دو مدل را فقط برای مرتب‌سازی بخش مشترک <code>special</code> استفاده می‌کند و امتیازهای دو مدل را مستقیماً با یکدیگر ترکیب نمی‌کند؛
+* صحت داده‌های ورودی، ستون‌های خروجی، شناسه‌های تکراری، کامل بودن `Metadata`، میزان اشتراک نتایج، تنوع ژانرها و خلاصه‌ی امتیازها را بررسی می‌کند.
 
-pipeline فعلی hybrid چند عنوان فیلم اولیه را می‌پذیرد، شناسه‌ی آن‌ها را پیدا می‌کند و برای ساخت profile محتوایی به ماژول content-based می‌دهد.
+`Pipeline` فعلی `Hybrid` می‌تواند چند عنوان فیلم اولیه را دریافت کند، شناسه‌ی آن‌ها را پیدا کند و این شناسه‌ها را برای ساخت `Profile` محتوایی به ماژول `Content-Based` ارسال کند.
 
 ### 🧱 ساختار پروژه
 
-~~~text
+```text
 hybrid-recommendation-system/
 ├── data/
 │   ├── raw/                      # فایل‌های خام فیلم‌ها و امتیازها
-│   └── processed/                # مسیر آماده برای داده‌ی پردازش‌شده‌ی آینده
+│   └── processed/                # مسیر آماده برای داده‌های پردازش‌شده‌ی آینده
 ├── docs/                         # مستندات هر ماژول
 ├── outputs/
 │   ├── dataset_analysis/         # گزارش‌های بررسی و آماده‌سازی داده
-│   ├── content_based/            # خروجی‌های اجرای content-based
-│   ├── collaborative/            # خروجی‌ها و مدل‌های collaborative
-│   ├── hybrid/                   # خروجی‌های اجرای hybrid
-│   └── showcase/                 # گزارش‌ها، artifactها و خروجی‌های نمایشی
+│   ├── content_based/            # خروجی‌های اجرای Content-Based
+│   ├── collaborative/            # خروجی‌ها و مدل‌های Collaborative
+│   ├── hybrid/                   # خروجی‌های اجرای Hybrid
+│   └── showcase/                 # گزارش‌ها، Artifactها و خروجی‌های نمایشی
 ├── scripts/
 │   ├── dataset/                  # تحلیل، اعتبارسنجی و پیش‌پردازش داده
-│   ├── content_based/            # اجرای feature، شباهت و پیشنهاددهی
+│   ├── content_based/            # اجرای Feature، شباهت و پیشنهاددهی
 │   ├── collaborative/            # آموزش SVD و پیشنهاددهی
-│   └── hybrid/                   # تولید و ارزیابی خروجی hybrid
+│   └── hybrid/                   # تولید و ارزیابی خروجی Hybrid
 ├── src/
 │   ├── config/                   # مسیرهای مرکزی پروژه
 │   ├── data/                     # بارگذاری، اعتبارسنجی و پیش‌پردازش
-│   ├── content_based/            # ویژگی‌های ژانری و cosine similarity
+│   ├── content_based/            # ویژگی‌های ژانری و Cosine Similarity
 │   ├── collaborative/            # مدل SVD، ارزیابی و پیشنهاددهی
-│   └── hybrid/                   # هماهنگی و ارزیابی hybrid
+│   └── hybrid/                   # هماهنگی و ارزیابی Hybrid
 ├── requirements.txt
 ├── pyproject.toml
 └── LICENSE
-~~~
+```
 
 ### 🚀 نصب و راه‌اندازی
 
 دستورهای زیر را از ریشه‌ی مخزن اجرا کنید:
 
-~~~bash
+```bash
 python -m venv .venv
-~~~
+```
 
-در Windows PowerShell:
+در `Windows PowerShell`:
 
-~~~powershell
+```powershell
 .venv\Scripts\Activate.ps1
-~~~
+```
 
-در macOS/Linux:
+در `macOS/Linux`:
 
-~~~bash
+```bash
 source .venv/bin/activate
-~~~
+```
 
-سپس وابستگی‌ها را نصب کنید:
+سپس وابستگی‌های پروژه را نصب کنید:
 
-~~~bash
+```bash
 python -m pip install -r requirements.txt
-~~~
+```
 
-اگر بعد از clone فایل‌های داده به‌طور کامل دریافت نشدند، Git LFS را نصب و داده‌ها را دریافت کنید:
+اگر بعد از `Clone` فایل‌های داده به‌طور کامل دریافت نشدند، مطمئن شوید `Git LFS` نصب شده است و سپس داده‌های تحت مدیریت آن را دریافت کنید:
 
-~~~bash
+```bash
 git lfs install
 git lfs pull
-~~~
+```
 
-### ▶️ اجرای pipelineها
+### ▶️ اجرای `Pipeline`ها
 
-همه‌ی دستورهای زیر باید از ریشه‌ی پروژه اجرا شوند.
+تمام دستورهای زیر باید از ریشه‌ی پروژه اجرا شوند.
 
-#### ۱. بررسی و آماده‌سازی داده
+#### ۱. بررسی و آماده‌سازی داده‌ها
 
-~~~bash
+```bash
 python scripts/dataset/analyze_dataset.py
 python scripts/dataset/validate_dataset.py
 python scripts/dataset/preprocess_dataset.py
-~~~
+```
 
-#### ۲. اجرای pipeline محتوایی
+#### ۲. اجرای `Pipeline` محتوایی
 
-~~~bash
+```bash
 python scripts/content_based/run_feature_engineering.py
 python scripts/content_based/run_similarity.py
 python scripts/content_based/run_recommender.py
-~~~
+```
 
 برای یک بررسی ساده با چند عنوان فیلم انتخابی:
 
-~~~bash
+```bash
 python scripts/content_based/test_content_based.py
-~~~
+```
 
 #### ۳. آموزش و استفاده از مدل مشارکتی
 
 برای آموزش، ارزیابی، ذخیره‌ی مدل و تولید یک نمونه پیشنهاد:
 
-~~~bash
+```bash
 python scripts/collaborative/run_svd.py
-~~~
+```
 
-بعد از ساخته شدن artifactهای مدل، اسکریپت آزمایشی مدل را بارگذاری می‌کند و شناسه‌ی کاربر را از شما می‌گیرد:
+پس از ایجاد `Artifact`های مدل، اسکریپت آزمایشی مدل را بارگذاری می‌کند و شناسه‌ی کاربر را از شما دریافت می‌کند:
 
-~~~bash
+```bash
 python scripts/collaborative/test_collaborative.py
-~~~
+```
 
-#### ۴. اجرای pipeline Hybrid
+#### ۴. اجرای `Pipeline` Hybrid
 
-~~~bash
+```bash
 python scripts/hybrid/run_hybrid.py
-~~~
+```
 
-این pipeline بخش collaborative را آموزش می‌دهد، ماتریس ژانری را می‌سازد، هر دو فهرست پیشنهاد را تولید می‌کند و خروجی را به بخش‌های مشترک، فقط محتوایی و فقط مشارکتی تقسیم می‌کند.
+این `Pipeline` ابتدا بخش `Collaborative` را آموزش می‌دهد، ماتریس ژانری را ایجاد می‌کند، فهرست پیشنهادهای هر دو مدل را تولید می‌کند و سپس خروجی را به سه بخش تقسیم می‌کند:
 
-برای ارزیابی خروجی تولیدشده می‌توانید ماژول ارزیابی فعلی را اجرا کنید:
+* پیشنهادهای مشترک؛
+* پیشنهادهای فقط محتوایی؛
+* پیشنهادهای فقط مشارکتی.
 
-~~~bash
+برای ارزیابی خروجی تولیدشده، می‌توانید ماژول ارزیابی فعلی را اجرا کنید:
+
+```bash
 python src/hybrid/evaluate_hybrid.py
-~~~
+```
 
-شناسه‌ی کاربر، عنوان فیلم‌های اولیه و تعداد پیشنهادها در اسکریپت‌های مربوطه تنظیم شده‌اند و بدون تغییر در کلاس‌های اصلی قابل ویرایش هستند.
+شناسه‌ی کاربر، عنوان فیلم‌های اولیه و تعداد پیشنهادهای موردنظر در اسکریپت‌های مربوطه تنظیم شده‌اند و می‌توان آن‌ها را بدون تغییر در کلاس‌های اصلی پروژه ویرایش کرد.
 
-### 📦 خروجی‌ها و Showcase
+### 📦 خروجی‌ها و `Showcase`
 
-خروجی‌های زمان اجرا داخل <code>outputs/</code> و بر اساس pipeline دسته‌بندی می‌شوند. بسته به ماژول، این خروجی‌ها می‌توانند شامل جدول پیشنهادها، گزارش ارزیابی، artifactهای feature، داده‌ی ذخیره‌شده‌ی مدل و نمودار باشند.
+خروجی‌های زمان اجرا در پوشه‌ی <code>outputs/</code> و بر اساس `Pipeline` مربوطه دسته‌بندی می‌شوند.
 
-پوشه‌ی <code>outputs/showcase/</code> نمونه‌های مرتب‌شده و قابل نمایش از بخش تحلیل داده، content-based و collaborative را نگه می‌دارد. هر بخش جداگانه قرار گرفته تا نتیجه‌ی هر مرحله با خروجی مدل دیگر قاطی نشود. فایل‌های مربوط به مدل و نمونه‌های تولیدشده نیز در همان ساختار ماژولار دسته‌بندی شده‌اند.
+بسته به ماژول، این خروجی‌ها می‌توانند شامل موارد زیر باشند:
 
-در حال حاضر خروجی‌های hybrid هنوز داخل showcase قرار نگرفته‌اند. با اجرای pipeline، خروجی‌های hybrid در <code>outputs/hybrid/</code> ساخته می‌شوند و در آینده، بعد از نهایی شدن نحوه‌ی نمایش آن‌ها، می‌توانند به showcase اضافه شوند.
+* جدول‌های پیشنهاد؛
+* گزارش‌های ارزیابی؛
+* `Feature Artifact`ها؛
+* داده‌های ذخیره‌شده‌ی مدل؛
+* نمودارها و خروجی‌های تصویری.
+
+پوشه‌ی <code>outputs/showcase/</code> نمونه‌های مرتب‌شده و قابل نمایش از بخش‌های تحلیل داده، `Content-Based` و `Collaborative` را نگه می‌دارد.
+
+هر بخش به‌صورت جداگانه نگهداری می‌شود تا نتایج مراحل مختلف با یکدیگر混 نشوند و بررسی خروجی هر مرحله ساده‌تر باشد. فایل‌های مربوط به مدل و نمونه‌های تولیدشده نیز بر اساس ماژول مربوطه دسته‌بندی شده‌اند.
+
+در حال حاضر، خروجی‌های `Hybrid` هنوز در `Showcase` قرار نگرفته‌اند. با اجرای `Pipeline`، این خروجی‌ها در <code>outputs/hybrid/</code> ایجاد می‌شوند و پس از نهایی شدن نحوه‌ی نمایش آن‌ها، می‌توان آن‌ها را به `Showcase` اضافه کرد.
 
 ### 📚 مستندات تکمیلی
 
-- [مستندات pipeline داده](docs/dataset.md)
-- [مستندات پیشنهاددهی محتوایی](docs/content_based.md)
-- [مستندات فیلتر مشارکتی](docs/collaborative.md)
+* [مستندات `Pipeline` داده](docs/dataset.md)
+* [مستندات پیشنهاددهی مبتنی بر محتوا](docs/content_based.md)
+* [مستندات `Collaborative Filtering`](docs/collaborative.md)
 
 ### 🛠️ فناوری‌های استفاده‌شده
 
-- Python
-- Pandas و NumPy برای پردازش داده؛
-- Scikit-learn برای cosine similarity؛
-- Scikit-surprise برای فاکتورگیری ماتریس با SVD؛
-- Joblib برای ذخیره و بارگذاری artifactهای مدل؛
-- Matplotlib و Seaborn برای پشتیبانی از خروجی‌های تصویری.
+* `Python`
+* `Pandas` و `NumPy` برای پردازش داده‌ها؛
+* `Scikit-learn` برای محاسبه‌ی `Cosine Similarity`؛
+* `Scikit-surprise` برای فاکتورگیری ماتریس با `SVD`؛
+* `Joblib` برای ذخیره و بارگذاری `Model Artifact`ها؛
+* `Matplotlib` و `Seaborn` برای تولید و پشتیبانی از خروجی‌های تصویری.
 
 ### 🔮 مسیر توسعه‌ی آینده
 
-ساختار پروژه طوری طراحی شده است که قابلیت‌های بعدی بدون تغییر در ایده‌ی اصلی اضافه شوند. مسیرهای توسعه‌ی آینده شامل این موارد هستند:
+ساختار پروژه به‌گونه‌ای طراحی شده است که قابلیت‌های جدید بتوانند بدون تغییر در ایده‌ی اصلی سیستم به آن اضافه شوند.
 
-- آماده‌سازی اجرای reproducible با Docker؛
-- ارائه‌ی سرویس پیشنهاددهی از طریق API؛
-- ساخت یک رابط کاربری یا application سبک؛
-- استفاده از ویژگی‌های غنی‌تر فیلم و روش‌های رتبه‌بندی پیشرفته‌تر؛
-- بهبود ثبت آزمایش‌ها و ارزیابی مناسب برای deployment.
+مسیرهای توسعه‌ی آینده شامل موارد زیر هستند:
+
+* آماده‌سازی اجرای قابل تکرار (`Reproducible`) با `Docker`؛
+* ارائه‌ی سرویس پیشنهاددهی از طریق `API`؛
+* ساخت یک رابط کاربری یا `Application` سبک؛
+* استفاده از ویژگی‌های غنی‌تر فیلم‌ها و روش‌های پیشرفته‌تر رتبه‌بندی؛
+* بهبود ثبت آزمایش‌ها و ارزیابی‌های مناسب برای محیط `Deployment`.
 
 ### 📄 مجوز
 
-این پروژه تحت مجوز MIT منتشر شده است. برای جزئیات به فایل [LICENSE](LICENSE) مراجعه کنید.
+این پروژه تحت مجوز `MIT` منتشر شده است. برای مشاهده‌ی جزئیات، به فایل [LICENSE](LICENSE) مراجعه کنید.
 
 [⬆️ بازگشت به انتخاب زبان](#hybrid-recommendation-system)
