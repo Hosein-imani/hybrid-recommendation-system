@@ -114,7 +114,7 @@ This separation keeps data preparation independent from the recommendation algor
 
 ~~~mermaid
 flowchart LR
-    A[ CSV فایل های خام ] --> B[ارزیابی داده]
+    A[ CSV فایل های خام ] --> B[بارگذاری داده]
     B --> C[ارزیابی داده]
     B --> D[پیش پردازش داده]
     C --> E[گزارش‌های کیفیت داده]
