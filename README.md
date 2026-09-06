@@ -371,11 +371,11 @@ flowchart LR
 
 ~~~mermaid
 flowchart TD
-    A[Top-N محتوایی] --> C{فیلم در هر دو فهرست هست؟}
-    B[Top-N مشارکتی] --> C
-    C -->|بله| D[Special: پیشنهاد مشترک]
-    C -->|فقط محتوایی| E[بخش Content-based]
-    C -->|فقط مشارکتی| F[بخش Collaborative]
+    A[محتوایی Top-N] --> C{فیلم در هر دو فهرست هست؟}
+    B[مشارکتی Top-N] --> C
+    C -->|بله| D[Special پیشنهاد مشترک]
+    C -->|فقط محتوایی| E[Content-based بخش]
+    C -->|فقط مشارکتی| F[Collaborative بخش]
 ~~~
 
 روند hybrid دارای ویژگی‌های زیر است:
