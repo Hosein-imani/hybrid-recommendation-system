@@ -387,7 +387,7 @@ flowchart TD
 - مجموع رتبه‌ها را فقط برای مرتب‌سازی بخش مشترک استفاده می‌کند و امتیازهای دو مدل را مستقیماً با یکدیگر ترکیب نمی‌کند؛
 - صحت داده‌های ورودی، ستون‌های خروجی، شناسه‌های تکراری، کامل بودن metadata، میزان اشتراک، تنوع و خلاصه‌ی امتیازها را بررسی می‌کند.
 
-بخش "hybrid" چند عنوان فیلم را به‌عنوان ورودی اولیه دریافت می‌کند، شناسه‌ی هر فیلم را پیدا می‌کند و سپس این شناسه‌ها را برای ساخت "profile" محتوایی به ماژول "content-based" می‌دهد.
+بخش hybrid چند عنوان فیلم را به‌عنوان ورودی اولیه دریافت می‌کند، شناسه‌ی هر فیلم را پیدا می‌کند و سپس این شناسه‌ها را برای ساخت profile محتوایی به ماژول content-based می‌دهد.
 
 ### 🧱 ساختار پروژه
 
@@ -399,21 +399,21 @@ hybrid-recommendation-system/
 ├── docs/                         # مستندات هر ماژول
 ├── outputs/
 │   ├── dataset_analysis/         # گزارش‌های بررسی و آماده‌سازی داده
-│   ├── content_based/            # خروجی‌های اجرای content-based
-│   ├── collaborative/            # خروجی‌ها و مدل‌های collaborative
-│   ├── hybrid/                   # خروجی‌های اجرای hybrid
-│   └── showcase/                 # گزارش‌ها، artifactها و خروجی‌های نمایشی
+│   ├── content_based/            # content-based خروجی‌های اجرای 
+│   ├── collaborative/            # collaborative خروجی‌ها و مدل‌های 
+│   ├── hybrid/                   # hybrid خروجی‌های اجرای 
+│   └── showcase/                 # و خروجی‌های نمایشی artifact گزارش‌ها
 ├── scripts/
 │   ├── dataset/                  # تحلیل، اعتبارسنجی و پیش‌پردازش داده
-│   ├── content_based/            # اجرای feature، شباهت و پیشنهاددهی
-│   ├── collaborative/            # آموزش SVD و پیشنهاددهی
-│   └── hybrid/                   # تولید و ارزیابی خروجی hybrid
+│   ├── content_based/            # شباهت و پیشنهاددهی feature اجرای 
+│   ├── collaborative/            # و پیشنهاددهی SVD آموزش 
+│   └── hybrid/                   # hybrid تولید و ارزیابی خروجی 
 ├── src/
 │   ├── config/                   # مسیرهای مرکزی پروژه
 │   ├── data/                     # بارگذاری، اعتبارسنجی و پیش‌پردازش
-│   ├── content_based/            # ویژگی‌های ژانری و cosine similarity
-│   ├── collaborative/            # مدل SVD، ارزیابی و پیشنهاددهی
-│   └── hybrid/                   # هماهنگی و ارزیابی hybrid
+│   ├── content_based/            # cosine similarity ویژگی‌های ژانری و 
+│   ├── collaborative/            # SVD ارزیابی و پیشنهاد دهی مدل  
+│   └── hybrid/                   # hybrid هماهنگی و ارزیابی 
 ├── requirements.txt
 ├── pyproject.toml
 └── LICENSE
