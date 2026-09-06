@@ -124,16 +124,16 @@ Hybrid runtime results are written under <code>outputs/hybrid/</code>. Hybrid ex
 
 ~~~mermaid
 flowchart TD
-    A[یک یا چند فیلم اولیه] --> B[پیشنهاددهنده‌ی Content-Based]
-    U[شناسه‌ی کاربر و داده‌ی امتیازها] --> C[پیشنهاددهنده‌ی Collaborative]
-    B --> D[نامزدهای Content-Based]
-    C --> E[نامزدهای Collaborative]
+    A[یک یا چند فیلم اولیه] --> B[Content-Based پیشنهاددهنده‌ی]
+    U[شناسه‌ی کاربر و داده‌ی امتیازها] --> C[Collaborative پیشنهاددهنده‌ی]
+    B --> D[Content-Based نامزدهای]
+    C --> E[Collaborative نامزدهای]
     D --> F[حذف فیلم‌های دیده‌شده]
     E --> F
     F --> G{فیلم مشترک است؟}
-    G -->|بله| H[بخش Special]
-    G -->|فقط محتوایی| I[بخش Content-Based]
-    G -->|فقط مشارکتی| J[بخش Collaborative]
+    G -->|بله| H[Special بخش]
+    G -->|فقط محتوایی| I[Content-Based بخش]
+    G -->|فقط مشارکتی| J[Collaborative بخش]
 ~~~
 
 ### روند پیشنهاددهی
@@ -152,8 +152,9 @@ flowchart TD
 | بخش | معنی |
 | --- | --- |
 | <code>special</code> | فیلم‌هایی که هر دو مدل پیشنهاد داده‌اند |
-| <code>content_based</code> | فیلم‌هایی که فقط مدل Content-Based پیشنهاد داده است |
-| <code>collaborative</code> | فیلم‌هایی که فقط مدل Collaborative پیشنهاد داده است |
+| <code>content_based</code> | پیشنهاد داده است Content-Based فیلم هایی که فقط مدل |
+| <code>collaborative</code> | پیشنهاد داده است Collaborative فیلم هایی که فقط مدل |
+
 
 هر نتیجه اطلاعات مربوط به منبع خود، مانند similarity، امتیاز تخمینی و رتبه‌ی مدل را حفظ می‌کند. برای مرتب کردن بخش <code>special</code> فقط مجموع رتبه‌های دو مدل استفاده می‌شود و امتیازهای آن‌ها مستقیماً با هم جمع نمی‌شوند.
 
