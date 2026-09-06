@@ -113,12 +113,12 @@ These metrics evaluate rating prediction quality. Ranking metrics can be added l
 
 ~~~mermaid
 flowchart LR
-    A[داده‌ی امتیازها] --> B[دیتاست Surprise]
+    A[داده‌ی امتیازها] --> B[ Surprise دیتاست]
     B --> C[تقسیم آموزش و آزمون]
-    C --> D[فاکتورگیری ماتریس با SVD]
-    D --> E[ارزیابی با RMSE و MAE]
+    C --> D[SVD فاکتورگیری ماتریس با]
+    D --> E[ RMSE و MAE ارزیابی با]
     D --> F[امتیازهای پیش‌بینی‌شده]
-    F --> G[پیشنهاد Top-N فیلم‌های ندیده]
+    F --> G[فیلم‌های ندیده Top-N پیشنهاد]
 ~~~
 
 ### روند کار مدل
