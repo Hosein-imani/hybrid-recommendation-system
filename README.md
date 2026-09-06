@@ -273,6 +273,16 @@ The project is structured so the next stages can be added without changing its c
 
 This project is released under the MIT License. See [LICENSE](LICENSE) for details.
 
+
+# ⭐ Note
+
+This project was developed primarily for **learning and understanding recommender system concepts**.
+
+The main focus of this project is to explore the architecture, implementation, and evaluation of different recommendation approaches, as well as how they can be combined within a "hybrid" recommendation system.
+
+If you find this project useful, I would greatly appreciate your support by giving it a ⭐.
+
+
 [⬆️ Back to language selection](#hybrid-recommendation-system)
 
 <a id="-راهنمای-فارسی"></a>
@@ -514,7 +524,6 @@ python src/hybrid/evaluate_hybrid.py
 
 پوشه‌ی `outputs/showcase/` نمونه‌های مرتب‌شده و قابل نمایش از بخش تحلیل داده، content-based و collaborative را نگه می‌دارد. هر بخش به‌صورت جداگانه قرار گرفته است تا نتیجه‌ی هر مرحله با خروجی مدل دیگر مخلوط نشود. فایل‌های مربوط به مدل و نمونه‌های تولیدشده نیز در همین ساختار ماژولار دسته‌بندی شده‌اند.
 
-در حال حاضر خروجی‌های hybrid هنوز داخل showcase قرار نگرفته‌اند. با اجرای pipeline، خروجی‌های hybrid در `outputs/hybrid/` ساخته می‌شوند و در آینده، پس از نهایی شدن نحوه‌ی نمایش آن‌ها، می‌توانند به showcase اضافه شوند.
 
 ### 📚 مستندات تکمیلی
 
@@ -525,12 +534,18 @@ python src/hybrid/evaluate_hybrid.py
 
 ### 🛠️ فناوری‌های استفاده‌شده
 
-- Python
-- Pandas و NumPy برای پردازش داده؛
-- Scikit-learn برای cosine similarity؛
-- Scikit-surprise برای فاکتورگیری ماتریس با SVD؛
-- Joblib برای ذخیره و بارگذاری artifactهای مدل؛
-- Matplotlib و Seaborn برای تولید خروجی‌های تصویری.
+
+پایتون (Python) 
+
+پانداس (Pandas) و نام‌پای (NumPy) برای پردازش داده؛ 
+
+سایکیت‌ لرن (Scikit-learn) برای محاسبه‌ی شباهت کسینوسی؛ 
+
+سایکیت‌ سوراپرایز (Scikit-Surprise) برای فاکتورگیری ماتریس با روش SVD؛ 
+
+جاب‌لیب (Joblib) برای ذخیره و بارگذاری Artifactهای مدل؛ 
+
+مت‌ پلات‌ لیب (Matplotlib) و سی‌ بورن (Seaborn) برای تولید خروجی‌های تصویری.
 
 ### 🔮 مسیر توسعه‌ی آینده
 
@@ -545,5 +560,15 @@ python src/hybrid/evaluate_hybrid.py
 ### 📄 مجوز
 
 این پروژه تحت مجوز MIT منتشر شده است. برای مشاهده‌ی جزئیات، به فایل [LICENSE](LICENSE) مراجعه کنید.
+
+
+# ⭐ نکته
+
+این پروژه با هدف **یادگیری و درک مفاهیم سیستم‌های پیشنهاددهنده** توسعه داده شده است.
+
+تمرکز اصلی پروژه بر درک معماری، پیاده‌سازی و ارزیابی روش‌های مختلف پیشنهاددهی و نحوه‌ی ترکیب آن‌ها در یک سیستم "hybrid" است.
+
+اگر این پروژه برای شما مفید بود، خوشحال می‌شوم با دادن یک ⭐ از آن حمایت کنید.
+
 
 [⬆️ بازگشت به انتخاب زبان](#hybrid-recommendation-system)
