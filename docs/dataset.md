@@ -114,9 +114,9 @@ This separation keeps data preparation independent from the recommendation algor
 
 ~~~mermaid
 flowchart LR
-    A[فایل‌های CSV خام] --> B[DataLoader]
-    B --> C[DataValidator]
-    B --> D[DataPreprocessor]
+    A[ CSV فایل های خام ] --> B[ارزیابی داده]
+    B --> C[ارزیابی داده]
+    B --> D[پیش پردازش داده]
     C --> E[گزارش‌های کیفیت داده]
     D --> F[داده‌های آماده]
     F --> G[ماژول‌های پیشنهاددهی]
@@ -135,9 +135,9 @@ flowchart LR
 
 ### اجزای اصلی
 
-- <code>src/data/loader.py</code> فایل‌های CSV خام را می‌خواند و اگر فایل موردنیاز وجود نداشته باشد، خطای واضحی ایجاد می‌کند.
-- <code>src/data/validator.py</code> تعداد سطر و ستون، نوع داده‌ها، مقادیر خالی و رکوردهای تکراری را بررسی می‌کند.
-- <code>src/data/preprocessor.py</code> داده‌ی فیلم‌ها و امتیازها را برای استفاده‌ی ماژول‌های پیشنهاددهی آماده می‌کند.
+- <code>src/data/loader.py</code> خام را می‌خواند و اگر فایل موردنیاز وجود نداشته باشد، خطای واضحی ایجاد می‌کند CSV فایل های
+- <code>src/data/validator.py</code> تعداد سطر و ستون، نوع داده‌ها، مقادیر خالی و رکوردهای تکراری را بررسی می‌کند
+- <code>src/data/preprocessor.py</code> داده‌ی فیلم‌ها و امتیازها را برای استفاده‌ی ماژول‌های پیشنهاددهی آماده می‌کند
 
 ### ساختار پروژه
 
