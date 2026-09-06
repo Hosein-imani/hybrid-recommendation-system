@@ -1,5 +1,14 @@
+# Data handling and numerical processing
 pandas
 numpy
+
+# Similarity and recommendation models
 scikit-learn
+scikit-surprise
+
+# Model persistence
+joblib
+
+# Visualization support
 matplotlib
 seaborn

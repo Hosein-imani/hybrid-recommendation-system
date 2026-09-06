@@ -1,379 +1,219 @@
-# Content-Based Recommendation System
+# Content-Based Recommendation
 
-## Overview
+[🇺🇸 English](#english) | [🇮🇷 فارسی](#persian)
 
-Content-Based Filtering is one of the fundamental approaches in recommendation systems.
+<a id="english"></a>
 
-The main idea behind this method is to recommend items based on the similarity between their characteristics rather than relying on other users' behavior.
+## 🇺🇸 English
 
-In this project, the Content-Based Recommendation module recommends movies by analyzing their metadata, especially movie genres.
+### Overview
 
-The system learns the characteristics of each movie and finds other movies with similar feature representations.
+The Content-Based module recommends movies with similar metadata. In the current implementation, the main content feature is the genre list of each movie.
 
----
+~~~mermaid
+flowchart LR
+    A[Selected movie or movies] --> B[Movie preprocessing]
+    B --> C[One-hot genre matrix]
+    C --> D[Preference profile]
+    D --> E[Cosine similarity]
+    E --> F[Remove input movies and rank]
+    F --> G[Top-N recommendations]
+~~~
 
-# Recommendation Approach
+### How It Works
 
-The Content-Based pipeline follows this process:
+1. Movie titles are cleaned and genres are converted into lists.
+2. <code>FeatureEngineer</code> creates a numerical genre matrix.
+3. Each movie is represented by a vector whose columns describe its genres.
+4. <code>SimilarityCalculator</code> builds a profile from one or more selected movies.
+5. Cosine similarity is calculated between the profile and all movie vectors.
+6. The selected movies are removed, and the highest-scoring candidates are returned.
 
-```text
-Movie Metadata
+When multiple movies are provided, their feature vectors are averaged into one profile. This allows the query to represent a broader preference instead of relying on a single title.
 
-      │
+### Main Components
 
-      ▼
+- <code>src/content_based/feature_engineering.py</code> creates the genre features.
+- <code>src/content_based/similarity.py</code> validates movie IDs, calculates similarity, and ranks candidates.
+- <code>src/content_based/recommender.py</code> provides the recommendation interface.
 
-Feature Engineering
+The similarity layer also checks that requested movie IDs exist and rejects duplicate input IDs.
 
-      │
+### Project Structure
 
-      ▼
+The following tree shows the files currently used by the Content-Based module:
 
-Feature Representation
-
-      │
-
-      ▼
-
-Similarity Calculation
-
-      │
-
-      ▼
-
-Recommendation Engine
-```
-
-The complete pipeline is designed as an independent module so it can be extended or replaced without affecting other parts of the project.
-
----
-
-# Why Content-Based Filtering?
-
-Content-Based Recommendation has several advantages:
-
-* It does not require large user interaction history.
-* It can recommend items even for new users.
-* Recommendations are explainable because they are based on item features.
-* It allows direct control over recommendation features.
-
-For example:
-
-If a user likes an animated fantasy movie, the system can recommend other movies that contain similar characteristics.
-
----
-
-# Project Architecture
-
-The Content-Based module follows a modular architecture:
-
-```text
+~~~text
 src/
-
 └── content_based/
-
     ├── feature_engineering.py
-
     ├── similarity.py
-
     └── recommender.py
-```
 
-Each component has a specific responsibility.
-
----
-
-# Feature Engineering
-
-Implementation:
-
-```text
-src/content_based/feature_engineering.py
-```
-
-The purpose of this component is to convert raw movie information into numerical features that machine learning algorithms can understand.
-
-Machine learning models cannot directly work with text values such as:
-
-```text
-Adventure
-Animation
-Comedy
-Fantasy
-```
-
-Therefore, the genre information is transformed into a numerical representation.
-
----
-
-# Genre Matrix
-
-The system creates a genre matrix using One-Hot Encoding.
-
-Example:
-
-Original movie information:
-
-```text
-Movie:
-Toy Story
-
-Genres:
-Animation, Comedy, Fantasy
-```
-
-After transformation:
-
-| Movie     | Animation | Comedy | Fantasy | Horror |
-| --------- | --------- | ------ | ------- | ------ |
-| Toy Story | 1         | 1      | 1       | 0      |
-
-Each column represents a feature, and each value indicates whether the movie contains that feature.
-
-This representation allows the system to compare movies mathematically.
-
----
-
-# Similarity Calculation
-
-Implementation:
-
-```text
-src/content_based/similarity.py
-```
-
-The similarity module is responsible for measuring how close two movies are based on their feature vectors.
-
-The project uses:
-
-## Cosine Similarity
-
-Cosine Similarity measures the angle between two feature vectors.
-
-The intuition:
-
-* Similar direction → Similar movies
-* Different direction → Less similar movies
-
-Example:
-
-Two fantasy animation movies:
-
-```text
-Toy Story
-Monsters Inc.
-```
-
-will have similar genre vectors and therefore receive a higher similarity score.
-
----
-
-# Similarity Optimization
-
-Instead of creating a complete similarity matrix between all movies, the system calculates similarity only when needed.
-
-The naive approach:
-
-```text
-34208 × 34208 matrix
-```
-
-would require a large amount of memory.
-
-The optimized approach:
-
-```text
-One movie vector
-
-        +
-
-All movie vectors
-
-        ↓
-
-Top-N similar movies
-```
-
-This design provides:
-
-* Lower memory usage
-* Faster execution
-* Better scalability
-
----
-
-# Recommendation Engine
-
-Implementation:
-
-```text
-src/content_based/recommender.py
-```
-
-The recommendation engine acts as the interface between the user and the similarity system.
-
-Its responsibility:
-
-* Receive a target movie
-* Request similarity calculation
-* Return the most relevant recommendations
-
-Example workflow:
-
-Input:
-
-```text
-Movie:
-Toy Story
-```
-
-Process:
-
-```text
-Toy Story
-
-↓
-
-Feature Vector
-
-↓
-
-Similarity Calculation
-
-↓
-
-Ranking
-
-↓
-
-Top Recommended Movies
-```
-
-Output:
-
-```text
-1. Toy Story 2
-2. Monsters Inc.
-3. Shrek
-...
-```
-
----
-
-# Output Structure
-
-The Content-Based module generates structured outputs:
-
-```text
-outputs/
-
+scripts/
 └── content_based/
+    ├── run_feature_engineering.py
+    ├── run_similarity.py
+    ├── run_recommender.py
+    └── test_content_based.py
+~~~
 
+### Outputs
+
+The Content-Based pipeline organizes its artifacts as follows:
+
+~~~text
+outputs/
+└── content_based/
     ├── feature_engineering/
-
-    │   ├── reports/
-
     │   ├── artifacts/
-
+    │   │   └── genre_matrix.csv
+    │   ├── reports/
+    │   │   └── feature_engineering_report.txt
     │   └── visualizations/
-
-    │
-
     ├── similarity/
-
-    │   ├── reports/
-
     │   ├── artifacts/
-
+    │   │   └── top_similar_movies.csv
+    │   ├── reports/
+    │   │   └── similarity_report.txt
     │   └── visualizations/
-
-    │
-
     └── recommender/
-
+        ├── recommendations/
+        │   └── recommendations.csv
         ├── reports/
-
-        ├── artifacts/
-
+        │   └── recommendation_report.txt
         └── visualizations/
-```
+~~~
 
----
+### Running the Pipeline
 
-# Current Limitations
+Run these commands from the repository root:
 
-The current implementation mainly relies on movie genres.
+~~~bash
+python scripts/content_based/run_feature_engineering.py
+python scripts/content_based/run_similarity.py
+python scripts/content_based/run_recommender.py
+~~~
 
-This means recommendations are based on:
+To test the recommender with selected movie titles:
 
-* Genre similarity
+~~~bash
+python scripts/content_based/test_content_based.py
+~~~
 
-and do not currently consider:
+The scripts write reports, feature artifacts, recommendation tables, and visual outputs under <code>outputs/content_based/</code>.
 
-* User preferences
-* Movie descriptions
-* Cast and directors
-* Reviews
-* User behavior patterns
+### Why This Approach?
 
----
+Content-Based filtering is explainable and does not require a large user interaction history. A recommendation can be understood by comparing the genres of the selected movies with the genres of the returned candidates.
 
-# Future Improvements
+The module is intentionally independent from the Collaborative model, which makes it easy to extend later with richer metadata such as descriptions, keywords, cast, or directors.
 
-Possible improvements:
+<a id="persian"></a>
 
-## Advanced Features
+## 🇮🇷 راهنمای فارسی
 
-Add additional movie features:
+### معرفی
 
-* Movie overview text
-* Keywords
-* Cast information
-* Director information
-* Release period
+ماژول Content-Based فیلم‌هایی را پیشنهاد می‌دهد که از نظر اطلاعات محتوایی به فیلم‌های انتخاب‌شده شباهت دارند. در نسخه‌ی فعلی، ویژگی اصلی هر فیلم فهرست ژانرهای آن است.
 
----
+~~~mermaid
+flowchart LR
+    A[یک یا چند فیلم انتخابی] --> B[پیش‌پردازش فیلم‌ها]
+    B --> C[ماتریس one-hot ژانرها]
+    C --> D[پروفایل سلیقه]
+    D --> E[Cosine similarity]
+    E --> F[حذف فیلم‌های ورودی و مرتب‌سازی]
+    F --> G[پیشنهادهای Top-N]
+~~~
 
-## Advanced Text Representation
+### روند کار
 
-Replace simple genre features with:
+1. عنوان فیلم‌ها تمیز می‌شود و ژانرها به فهرست تبدیل می‌شوند.
+2. کلاس <code>FeatureEngineer</code> ماتریس عددی ژانرها را می‌سازد.
+3. هر فیلم به‌صورت یک بردار نمایش داده می‌شود و ستون‌های این بردار، ژانرهای فیلم را نشان می‌دهند.
+4. <code>SimilarityCalculator</code> با استفاده از یک یا چند فیلم انتخابی، یک پروفایل سلیقه می‌سازد.
+5. شباهت cosine بین این پروفایل و بردار همه‌ی فیلم‌ها محاسبه می‌شود.
+6. فیلم‌های ورودی از نتیجه حذف می‌شوند و نزدیک‌ترین گزینه‌ها بر اساس امتیاز شباهت برگردانده می‌شوند.
 
-* TF-IDF
-* Word Embeddings
-* Transformer-based representations
+اگر چند فیلم انتخاب شود، بردارهای ویژگی آن‌ها میانگین‌گیری می‌شوند و یک پروفایل مشترک می‌سازند. بنابراین نتیجه فقط به یک عنوان وابسته نمی‌ماند و می‌تواند سلیقه‌ی گسترده‌تری را نشان دهد.
 
----
+### اجزای اصلی
 
-## Hybrid Integration
+- <code>src/content_based/feature_engineering.py</code> ویژگی‌های ژانری را ایجاد می‌کند.
+- <code>src/content_based/similarity.py</code> شناسه‌ی فیلم‌ها را بررسی می‌کند، شباهت را محاسبه می‌کند و نتیجه را مرتب می‌کند.
+- <code>src/content_based/recommender.py</code> رابط اصلی پیشنهاددهی را فراهم می‌کند.
 
-Combine Content-Based recommendations with Collaborative Filtering:
+لایه‌ی محاسبه‌ی شباهت بررسی می‌کند که شناسه‌های واردشده در داده وجود داشته باشند و شناسه‌ی تکراری در ورودی پذیرفته نشود.
 
-```text
-Content Similarity
+### ساختار پروژه
 
-+
+درخت زیر فایل‌هایی را نشان می‌دهد که در حال حاضر برای ماژول پیشنهاددهی مبتنی بر محتوا استفاده می‌شوند:
 
-User Behavior
+~~~text
+src/
+└── content_based/
+    ├── feature_engineering.py
+    ├── similarity.py
+    └── recommender.py
 
-↓
+scripts/
+└── content_based/
+    ├── run_feature_engineering.py
+    ├── run_similarity.py
+    ├── run_recommender.py
+    └── test_content_based.py
+~~~
 
-Hybrid Recommendation System
-```
+### خروجی‌ها
 
-This can improve recommendation quality by combining item information and user preferences.
+پایپ لاین مربوط به Content-Based خروجی‌های خود را در ساختار زیر دسته‌بندی می‌کند:
 
----
 
-# Summary
+~~~text
+outputs/
+└── content_based/
+    ├── feature_engineering/
+    │   ├── artifacts/
+    │   │   └── genre_matrix.csv
+    │   ├── reports/
+    │   │   └── feature_engineering_report.txt
+    │   └── visualizations/
+    ├── similarity/
+    │   ├── artifacts/
+    │   │   └── top_similar_movies.csv
+    │   ├── reports/
+    │   │   └── similarity_report.txt
+    │   └── visualizations/
+    └── recommender/
+        ├── recommendations/
+        │   └── recommendations.csv
+        ├── reports/
+        │   └── recommendation_report.txt
+        └── visualizations/
+~~~
 
-The Content-Based Recommendation module provides a complete pipeline for recommending movies based on their characteristics.
+### اجرای Pipeline
 
-By separating feature engineering, similarity calculation, and recommendation logic, the system achieves:
+این دستورها را از ریشه‌ی مخزن اجرا کنید:
 
-* Clean architecture
-* Easy maintenance
-* Better scalability
-* Reusable components
-* Simple future integration with hybrid models
+~~~bash
+python scripts/content_based/run_feature_engineering.py
+python scripts/content_based/run_similarity.py
+python scripts/content_based/run_recommender.py
+~~~
 
-This module represents the first recommendation approach implemented in the project and provides the foundation for future collaborative and hybrid recommendation methods.
+برای آزمایش پیشنهاددهنده با چند عنوان فیلم انتخابی:
+
+~~~bash
+python scripts/content_based/test_content_based.py
+~~~
+
+این اسکریپت‌ها گزارش‌ها، artifactهای ویژگی، جدول‌های پیشنهاد و خروجی‌های تصویری را داخل <code>outputs/content_based/</code> قرار می‌دهند.
+
+### چرا این روش؟
+
+فیلتر مبتنی بر محتوا قابل توضیح است و برای کاربر جدید به سابقه‌ی طولانی از تعامل‌ها نیاز ندارد. می‌توان دلیل هر پیشنهاد را با مقایسه‌ی ژانرهای فیلم‌های انتخابی و فیلم‌های پیشنهادی توضیح داد.
+
+این ماژول از مدل Collaborative مستقل است؛ بنابراین در آینده می‌توان ویژگی‌های بیشتری مانند خلاصه‌ی داستان، keywordها، بازیگران یا کارگردان را به آن اضافه کرد.
+
