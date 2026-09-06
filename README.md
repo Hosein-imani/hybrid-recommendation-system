@@ -245,10 +245,10 @@ Hybrid runtime outputs are not included in the showcase yet. They are generated 
 
 ### 📚 Additional documentation
 
-- [Dataset pipeline](docs/dataset_new.md)
-- [Content-based recommendation](docs/content_based_new.md)
-- [Collaborative filtering](docs/collaborative_new.md)
-- [Hybrid recommendation](docs/hybrid_new.md)
+- [Dataset pipeline](docs/dataset.md)
+- [Content-based recommendation](docs/content_based.md)
+- [Collaborative filtering](docs/collaborative.md)
+- [Hybrid recommendation](docs/hybrid.md)
 
 ### 🛠️ Technology stack
 
@@ -527,10 +527,10 @@ python src/hybrid/evaluate_hybrid.py
 
 ### 📚 مستندات تکمیلی
 
-- [مستندات pipeline داده](docs/dataset_new.md)
-- [مستندات پیشنهاددهی محتوایی](docs/content_based_new.md)
-- [مستندات فیلتر مشارکتی](docs/collaborative_new.md)
-- [مستندات پیشنهاددهی Hybrid](docs/hybrid_new.md)
+- [مستندات pipeline داده](docs/dataset.md)
+- [مستندات پیشنهاددهی محتوایی](docs/content_based.md)
+- [مستندات فیلتر مشارکتی](docs/collaborative.md)
+- [مستندات پیشنهاددهی Hybrid](docs/hybrid.md)
 
 ### 🛠️ فناوری‌های استفاده‌شده
 
