@@ -373,9 +373,9 @@ flowchart LR
 flowchart TD
     A[محتوایی Top-N] --> C{فیلم در هر دو فهرست هست؟}
     B[مشارکتی Top-N] --> C
-    C -->|بله| D[Special پیشنهاد مشترک]
-    C -->|فقط محتوایی| E[Content-based بخش]
-    C -->|فقط مشارکتی| F[Collaborative بخش]
+    C -->|D[Special پیشنهاد مشترک]
+    C -->|E[Content-based بخش]
+    C -->|F[Collaborative بخش]
 ~~~
 
 روند hybrid دارای ویژگی‌های زیر است:
