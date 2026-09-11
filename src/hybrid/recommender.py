@@ -8,9 +8,9 @@ class HybridRecommender:
     """
     Coordinate two independent recommenders without score-level fusion.
 
-    The content-based and collaborative models each produce their own Top-N
-    list. Movies returned by both models are moved to a separate
-    "special" section. The remaining movies preserve their source identity.
+    The content-based and collaborative models each produce a candidate pool.
+    Movies returned by both models are moved to a separate "special" section.
+    The remaining movies preserve their source identity.
     """
 
     REQUIRED_MOVIE_COLUMNS = {
@@ -64,6 +64,8 @@ class HybridRecommender:
         seed_movie_id: int,
         genre_matrix: pd.DataFrame,
         top_n_per_model: int = 10,
+        special_candidate_pool_size: int = 500,
+        special_top_n: int = 10,
     ) -> dict[str, pd.DataFrame]:
         """
         Return three independent recommendation sections.
@@ -79,9 +81,11 @@ class HybridRecommender:
 
         Notes
         -----
-        Each model initially returns exactly ``top_n_per_model`` candidates.
-        Already-seen movies are removed. A movie appearing in both lists is
-        shown only once, inside the special section.
+        Each model is evaluated over a candidate pool large enough for the
+        requested Special section. The regular Content-Based and
+        Collaborative sections keep only ``top_n_per_model`` candidates.
+        Already-seen movies are removed. A movie appearing in both displayed
+        lists is shown only once, inside the Special section.
         """
 
         self._validate_request(
@@ -89,22 +93,29 @@ class HybridRecommender:
             seed_movie_id=seed_movie_id,
             genre_matrix=genre_matrix,
             top_n_per_model=top_n_per_model,
+            special_candidate_pool_size=special_candidate_pool_size,
+            special_top_n=special_top_n,
         )
 
         seen_movie_ids = set(
             self._get_seen_movie_ids(user_id).tolist()
         )
 
+        candidate_pool_size = max(
+            top_n_per_model,
+            special_candidate_pool_size,
+        )
+
         content_recommendations = self.content_recommender.recommend(
             movie_id=seed_movie_id,
             genre_matrix=genre_matrix,
-            top_n=top_n_per_model,
+            top_n=candidate_pool_size,
         )
 
         collaborative_recommendations = (
             self.collaborative_recommender.recommend(
                 user_id=user_id,
-                n_recommendations=top_n_per_model,
+                n_recommendations=candidate_pool_size,
             )
         )
 
@@ -126,7 +137,7 @@ class HybridRecommender:
             ~collaborative_candidates["movieId"].isin(seen_movie_ids)
         ].reset_index(drop=True)
 
-        common_movie_ids = set(
+        special_common_movie_ids = set(
             content_candidates["movieId"]
         ).intersection(
             collaborative_candidates["movieId"]
@@ -135,17 +146,41 @@ class HybridRecommender:
         special = self._build_special_section(
             content_candidates=content_candidates,
             collaborative_candidates=collaborative_candidates,
-            common_movie_ids=common_movie_ids,
+            common_movie_ids=special_common_movie_ids,
+            top_n=special_top_n,
+        )
+
+        content_candidates = content_candidates.head(
+            top_n_per_model
+        )
+
+        collaborative_candidates = collaborative_candidates.head(
+            top_n_per_model
+        )
+
+        displayed_common_movie_ids = set(
+            content_candidates["movieId"]
+        ).intersection(
+            collaborative_candidates["movieId"]
+        )
+
+        special_movie_ids = set(
+            special["movieId"]
+        )
+
+        excluded_movie_ids = (
+            displayed_common_movie_ids
+            | special_movie_ids
         )
 
         content_only = self._build_content_section(
             content_candidates=content_candidates,
-            common_movie_ids=common_movie_ids,
+            common_movie_ids=excluded_movie_ids,
         )
 
         collaborative_only = self._build_collaborative_section(
             collaborative_candidates=collaborative_candidates,
-            common_movie_ids=common_movie_ids,
+            common_movie_ids=excluded_movie_ids,
         )
 
         return {
@@ -159,6 +194,7 @@ class HybridRecommender:
         content_candidates: pd.DataFrame,
         collaborative_candidates: pd.DataFrame,
         common_movie_ids: set,
+        top_n: int,
     ) -> pd.DataFrame:
         if not common_movie_ids:
             return self._empty_result()
@@ -207,6 +243,10 @@ class HybridRecommender:
             ascending=True,
             kind="mergesort",
         ).drop(columns="_rank_sum")
+
+        special = special.head(
+            top_n
+        )
 
         special["category"] = self.SPECIAL_CATEGORY
 
@@ -422,6 +462,8 @@ class HybridRecommender:
         seed_movie_id: int | list[int],
         genre_matrix: pd.DataFrame,
         top_n_per_model: int,
+        special_candidate_pool_size: int,
+        special_top_n: int,
     ) -> None:
 
         if (
@@ -431,6 +473,25 @@ class HybridRecommender:
         ):
             raise ValueError(
                 "top_n_per_model must be a positive integer."
+            )
+
+        if (
+            not isinstance(special_candidate_pool_size, int)
+            or isinstance(special_candidate_pool_size, bool)
+            or special_candidate_pool_size <= 0
+        ):
+            raise ValueError(
+                "special_candidate_pool_size must be "
+                "a positive integer."
+            )
+
+        if (
+            not isinstance(special_top_n, int)
+            or isinstance(special_top_n, bool)
+            or special_top_n <= 0
+        ):
+            raise ValueError(
+                "special_top_n must be a positive integer."
             )
 
         if not isinstance(genre_matrix, pd.DataFrame):

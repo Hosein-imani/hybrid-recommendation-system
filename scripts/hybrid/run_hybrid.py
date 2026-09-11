@@ -36,6 +36,8 @@ SEED_MOVIE_TITLES = [
 ]
 
 TOP_N_PER_MODEL = 10
+SPECIAL_CANDIDATE_POOL_SIZE = 500
+SPECIAL_TOP_N = 10
 
 
 # ============================================================
@@ -91,6 +93,10 @@ def generate_hybrid_recommendations(
         seed_movie_id=seed_movie_ids,
         genre_matrix=genre_matrix,
         top_n_per_model=TOP_N_PER_MODEL,
+        special_candidate_pool_size=(
+            SPECIAL_CANDIDATE_POOL_SIZE
+        ),
+        special_top_n=SPECIAL_TOP_N,
     )
 
     return sections
@@ -396,6 +402,14 @@ Seed Movie IDs
 Requested Per Model
 -------------------
 {TOP_N_PER_MODEL}
+
+Special Candidate Pool
+----------------------
+{SPECIAL_CANDIDATE_POOL_SIZE}
+
+Special Recommendation Limit
+----------------------------
+{SPECIAL_TOP_N}
 
 Special Recommendations
 -----------------------
