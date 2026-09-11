@@ -28,7 +28,7 @@ from src.hybrid.recommender import (
 # Configuration
 # ============================================================
 
-USER_ID = 5
+USER_ID = 6
 
 SEED_MOVIE_TITLES = [
     "Jumanji",
@@ -94,6 +94,46 @@ def generate_hybrid_recommendations(
     )
 
     return sections
+
+
+def clear_previous_outputs():
+
+    recommendation_patterns = (
+        "*special_recommendations.csv",
+        "*content_recommendations.csv",
+        "*collaborative_recommendations.csv",
+        "*all_recommendations.csv",
+        "hybrid_recommendations.csv",
+    )
+
+    report_patterns = (
+        "*hybrid_report.txt",
+        "*hybrid_evaluation_report.txt",
+    )
+
+    removed_files = []
+
+    for pattern in recommendation_patterns:
+
+        for output_file in (
+            HYBRID_RECOMMENDATIONS_DIR.glob(pattern)
+        ):
+
+            if output_file.is_file():
+                output_file.unlink()
+                removed_files.append(output_file)
+
+    for pattern in report_patterns:
+
+        for output_file in (
+            HYBRID_REPORTS_DIR.glob(pattern)
+        ):
+
+            if output_file.is_file():
+                output_file.unlink()
+                removed_files.append(output_file)
+
+    return removed_files
 
 
 # ============================================================
@@ -270,33 +310,43 @@ def main():
         exist_ok=True,
     )
 
+    print(
+        "\nRemoving previous Hybrid outputs..."
+    )
+
+    removed_files = clear_previous_outputs()
+
+    print(
+        f"Removed files: {len(removed_files)}"
+    )
+
     # ========================================================
     # Output Paths
     # ========================================================
 
     special_path = (
         HYBRID_RECOMMENDATIONS_DIR
-        / f"user_{USER_ID}_special_recommendations.csv"
+        / "special_recommendations.csv"
     )
 
     content_path = (
         HYBRID_RECOMMENDATIONS_DIR
-        / f"user_{USER_ID}_content_recommendations.csv"
+        / "content_recommendations.csv"
     )
 
     collaborative_path = (
         HYBRID_RECOMMENDATIONS_DIR
-        / f"user_{USER_ID}_collaborative_recommendations.csv"
+        / "collaborative_recommendations.csv"
     )
 
     combined_path = (
         HYBRID_RECOMMENDATIONS_DIR
-        / f"user_{USER_ID}_all_recommendations.csv"
+        / "hybrid_recommendations.csv"
     )
 
     report_path = (
         HYBRID_REPORTS_DIR
-        / f"user_{USER_ID}_hybrid_report.txt"
+        / "hybrid_report.txt"
     )
 
     # ========================================================

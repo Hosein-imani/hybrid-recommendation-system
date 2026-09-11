@@ -13,21 +13,42 @@ from src.config.settings import (
 from src.hybrid.evaluator import HybridEvaluator
 
 
-USER_ID = 5
+INPUT_FILE = (
+    HYBRID_RECOMMENDATIONS_DIR
+    / "hybrid_recommendations.csv"
+)
+
+OUTPUT_FILE = (
+    HYBRID_REPORTS_DIR
+    / "hybrid_evaluation_report.txt"
+)
 
 
-def _load_recommendations(
-    filename: str,
-) -> pd.DataFrame:
-    path = HYBRID_RECOMMENDATIONS_DIR / filename
-
-    if not path.exists():
+def _load_hybrid_output() -> pd.DataFrame:
+    if not INPUT_FILE.exists():
         raise FileNotFoundError(
-            f"Recommendation file was not found:\n{path}\n\n"
+            f"Recommendation file was not found:\n"
+            f"{INPUT_FILE}\n\n"
             "Run scripts/hybrid/run_hybrid.py first."
         )
 
-    return pd.read_csv(path)
+    return pd.read_csv(INPUT_FILE)
+
+
+def _build_sections(
+    data: pd.DataFrame,
+) -> dict[str, pd.DataFrame]:
+    return {
+        "special": data[
+            data["category"] == "special"
+        ].copy(),
+        "content_based": data[
+            data["category"] == "content_based"
+        ].copy(),
+        "collaborative": data[
+            data["category"] == "collaborative"
+        ].copy(),
+    }
 
 
 def _format_value(value):
@@ -147,23 +168,11 @@ def main():
 
     print("\nLoading Hybrid recommendation output...")
 
-    special = _load_recommendations(
-        f"user_{USER_ID}_special_recommendations.csv"
-    )
+    recommendations = _load_hybrid_output()
 
-    content_based = _load_recommendations(
-        f"user_{USER_ID}_content_recommendations.csv"
+    sections = _build_sections(
+        recommendations
     )
-
-    collaborative = _load_recommendations(
-        f"user_{USER_ID}_collaborative_recommendations.csv"
-    )
-
-    sections = {
-        "special": special,
-        "content_based": content_based,
-        "collaborative": collaborative,
-    }
 
     print("Running HybridEvaluator...")
 
@@ -182,13 +191,8 @@ def main():
         exist_ok=True,
     )
 
-    report_path = (
-        HYBRID_REPORTS_DIR
-        / f"user_{USER_ID}_hybrid_evaluation_report.txt"
-    )
-
     with open(
-        report_path,
+        OUTPUT_FILE,
         "w",
         encoding="utf-8",
     ) as file:
@@ -197,7 +201,7 @@ def main():
     print("\n" + report)
 
     print("\nEvaluation report saved:")
-    print(report_path)
+    print(OUTPUT_FILE)
 
 
 if __name__ == "__main__":

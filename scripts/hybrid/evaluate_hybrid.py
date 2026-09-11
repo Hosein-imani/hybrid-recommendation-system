@@ -1,11 +1,7 @@
-from pathlib import Path
-
 from src.config.settings import (
     HYBRID_RECOMMENDATIONS_DIR,
     HYBRID_REPORTS_DIR,
 )
-
-from src.data.loader import DataLoader
 
 from src.hybrid.evaluator import (
     HybridEvaluator,
@@ -28,7 +24,7 @@ def load_hybrid_output():
         raise FileNotFoundError(
             "Hybrid recommendation output was not found:\n"
             f"{INPUT_FILE}\n\n"
-            "Run run_hybrid.py first."
+            "Run scripts/hybrid/run_hybrid.py first."
         )
 
     return INPUT_FILE
