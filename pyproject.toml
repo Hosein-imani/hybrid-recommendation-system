@@ -7,6 +7,22 @@ build-backend = "setuptools.build_meta"
 name = "hybrid-recommendation-system"
 version = "0.1.0"
 
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+]
+
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+markers = [
+    "unit: fast tests of isolated production units",
+    "integration: tests covering boundaries between real project components",
+    "e2e: a small number of complete user-facing workflows",
+]
