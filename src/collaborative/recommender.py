@@ -42,6 +42,14 @@ class CollaborativeRecommender:
         for a user.
         """
 
+        if (
+            not isinstance(n_recommendations, int)
+            or isinstance(n_recommendations, bool)
+            or n_recommendations <= 0
+        ):
+            raise ValueError(
+                "n_recommendations must be a positive integer."
+            )
 
         recommendations = []
 
