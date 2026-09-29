@@ -65,3 +65,27 @@ def test_similarity_rejects_invalid_seed_requests(
             movie_id=movie_id,
             genre_matrix=genre_matrix,
         )
+
+
+@pytest.mark.parametrize(
+    "top_n",
+    [0, -1, True, False, 1.5, "3"],
+)
+def test_similarity_rejects_invalid_top_n(genre_matrix, top_n):
+    with pytest.raises(ValueError, match="top_n"):
+        SimilarityCalculator.find_similar_movies(
+            movie_id=1,
+            genre_matrix=genre_matrix,
+            top_n=top_n,
+        )
+
+
+def test_similarity_accepts_valid_positive_top_n(genre_matrix):
+    result = SimilarityCalculator.find_similar_movies(
+        movie_id=1,
+        genre_matrix=genre_matrix,
+        top_n=2,
+    )
+
+    assert len(result) == 2
+    assert 1 not in set(result["movieId"])

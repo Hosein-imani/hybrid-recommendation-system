@@ -15,6 +15,15 @@ class SimilarityCalculator:
         top_n: int = 10,
     ) -> pd.DataFrame:
 
+        if (
+            not isinstance(top_n, int)
+            or isinstance(top_n, bool)
+            or top_n <= 0
+        ):
+            raise ValueError(
+                "top_n must be a positive integer."
+            )
+
         # -----------------------------------------
         # Normalize input
         # -----------------------------------------

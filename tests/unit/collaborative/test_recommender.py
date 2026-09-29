@@ -76,3 +76,38 @@ def test_recommender_treats_unknown_user_as_having_no_rated_movies(
     result = recommender.recommend(user_id=99, n_recommendations=10)
 
     assert result["movieId"].tolist() == [4, 1, 2, 5, 3]
+
+
+@pytest.mark.parametrize(
+    "n_recommendations",
+    [0, -1, True, False, 1.5, "3"],
+)
+def test_recommender_rejects_invalid_n_recommendations(
+    collaborative_movies,
+    n_recommendations,
+):
+    recommender = CollaborativeRecommender(
+        model=StubModel(),
+        trainset=StubTrainset({7}),
+        movies=collaborative_movies,
+    )
+
+    with pytest.raises(ValueError, match="n_recommendations"):
+        recommender.recommend(
+            user_id=7,
+            n_recommendations=n_recommendations,
+        )
+
+
+def test_recommender_accepts_valid_positive_n_recommendations(
+    collaborative_movies,
+):
+    recommender = CollaborativeRecommender(
+        model=StubModel(),
+        trainset=StubTrainset({7}),
+        movies=collaborative_movies,
+    )
+
+    result = recommender.recommend(user_id=7, n_recommendations=1)
+
+    assert result["movieId"].tolist() == [4]
