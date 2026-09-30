@@ -56,3 +56,38 @@ def test_preprocess_ratings_accepts_already_prepared_frame(raw_ratings):
     result = DataPreprocessor.preprocess_ratings(prepared)
 
     pd.testing.assert_frame_equal(result, prepared)
+
+
+@pytest.mark.parametrize("missing_value", [None, float("nan"), pd.NA])
+def test_split_genres_raises_clear_error_for_missing_genre_and_preserves_input(
+    raw_movies,
+    missing_value,
+):
+    movies = raw_movies.copy(deep=True)
+    movies.loc[1, "genres"] = missing_value
+    original = movies.copy(deep=True)
+
+    with pytest.raises(
+        ValueError,
+        match=r"Missing genre value for movie .*row=1.*movieId=2.*title='Jumanji \(1995\)'",
+    ):
+        DataPreprocessor.split_genres(movies)
+
+    pd.testing.assert_frame_equal(movies, original)
+
+
+def test_preprocess_movies_raises_clear_error_for_missing_genre_and_preserves_input(
+    raw_movies,
+):
+    movies = raw_movies.copy(deep=True)
+    movies.loc[2, "genres"] = None
+    original = movies.copy(deep=True)
+
+    with pytest.raises(
+        ValueError,
+        match=r"Missing genre value for movie .*row=2.*movieId=3.*title='Grumpier Old Men'",
+    ):
+        DataPreprocessor.preprocess_movies(movies)
+
+    pd.testing.assert_frame_equal(movies, original)
+
