@@ -18,7 +18,7 @@ def test_dataset_info_reports_shape_types_missing_values_and_duplicates():
 
     report = DataValidator.dataset_info(data, "Movies")
 
-    assert "Movies Dataset" in report
+    assert "missing-marker" in report
     assert "Rows: 3" in report
     assert "Columns: 2" in report
     assert "Missing Values:" in report
