@@ -40,6 +40,22 @@ class DataPreprocessor:
         """
         Convert genres string into a list.
         """
+        if "genres" not in df.columns:
+            raise ValueError("Movies dataset must contain a 'genres' column.")
+
+        missing_mask = df["genres"].isna()
+        if missing_mask.any():
+            idx = missing_mask[missing_mask].index[0]
+            row = df.loc[idx]
+            identifiers = [f"row={idx}"]
+            if "movieId" in df.columns and pd.notna(row["movieId"]):
+                identifiers.append(f"movieId={row['movieId']}")
+            if "title" in df.columns and pd.notna(row["title"]):
+                identifiers.append(f"title={row['title']!r}")
+            raise ValueError(
+                f"Missing genre value for movie ({', '.join(identifiers)})."
+            )
+
         movies = df.copy()
 
         movies["genres"] = movies["genres"].str.split("|")
