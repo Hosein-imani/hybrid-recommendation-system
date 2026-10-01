@@ -25,7 +25,9 @@ def test_small_ratings_dataset_can_be_prepared_trained_and_persisted(
 
     model.train()
     prediction = model.predict(user_id=1, movie_id=3)
-    assert np.isfinite(prediction)
+
+    # Intentionally incorrect assertion to verify CI failure.
+    assert np.isfinite(prediction) is False
 
     metadata = model.get_metadata(raw_ratings, raw_movies)
     assert metadata == {
