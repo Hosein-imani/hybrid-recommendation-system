@@ -16,13 +16,13 @@ class CollaborativeModel:
     using Surprise SVD algorithm.
     """
 
-
     def __init__(
         self,
         n_factors=50,
         learning_rate=0.005,
         regularization=0.02,
-        epochs=20
+        epochs=20,
+        random_state=42
     ):
         """
         Initialize SVD model.
@@ -40,17 +40,22 @@ class CollaborativeModel:
 
         epochs:
             Training iterations
+
+        random_state:
+            Random seed used by the SVD model for reproducible training.
         """
         self.n_factors = n_factors
         self.learning_rate = learning_rate
         self.regularization = regularization
         self.epochs = epochs
+        self.random_state = random_state
 
         self.model = SVD(
             n_factors=n_factors,
             lr_all=learning_rate,
             reg_all=regularization,
-            n_epochs=epochs
+            n_epochs=epochs,
+            random_state=random_state
         )
 
 
@@ -230,6 +235,8 @@ class CollaborativeModel:
 
             "epochs":
                 self.epochs,
+            "random_state":
+                self.random_state,
 
             "ratings":
                 len(ratings),
