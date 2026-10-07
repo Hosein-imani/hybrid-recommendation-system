@@ -34,6 +34,7 @@ def test_small_ratings_dataset_can_be_prepared_trained_and_persisted(
         "learning_rate": 0.005,
         "regularization": 0.02,
         "epochs": 5,
+        "random_state": 42,
         "ratings": len(raw_ratings),
         "movies": len(raw_movies),
         "users": raw_ratings["userId"].nunique(),
@@ -52,3 +53,49 @@ def test_small_ratings_dataset_can_be_prepared_trained_and_persisted(
 def test_training_requires_prepared_data():
     with pytest.raises(ValueError, match="Dataset is not prepared"):
         CollaborativeModel(n_factors=2, epochs=1).train()
+
+
+def test_training_is_reproducible_with_same_random_state(
+    raw_movies,
+    raw_ratings,
+):
+    random_state = 123
+
+    model_one = CollaborativeModel(
+        n_factors=2,
+        epochs=5,
+        random_state=random_state,
+    )
+    model_one.prepare_data(raw_ratings)
+    model_one.train()
+
+    model_two = CollaborativeModel(
+        n_factors=2,
+        epochs=5,
+        random_state=random_state,
+    )
+    model_two.prepare_data(raw_ratings)
+    model_two.train()
+
+    prediction_one = model_one.predict(
+        user_id=1,
+        movie_id=3,
+    )
+
+    prediction_two = model_two.predict(
+        user_id=1,
+        movie_id=3,
+    )
+
+    assert prediction_one == pytest.approx(
+        prediction_two,
+        rel=1e-10,
+        abs=1e-10,
+    )
+
+    metadata = model_one.get_metadata(
+        raw_ratings,
+        raw_movies,
+    )
+
+    assert metadata["random_state"] == random_state
